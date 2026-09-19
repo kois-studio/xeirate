@@ -14,8 +14,7 @@ These questions are intentionally not requirements yet. Answers should be record
 
 ## Product and delivery
 
-- Should the first public demo support only one active month or multiple local sessions?
-- Should repeatable person-level conditions be copied into future sessions, and how does the coordinator review or disable them?
+- Should repeatable person-level conditions support more recurrence patterns than one weekday, and how does the coordinator review or disable them?
 - Which export is most useful first: print view, image, PDF, or a structured file?
 - Is a service worker/offline cache worth the maintenance cost for a later release? The first release has a manifest and supports an iPhone home-screen shortcut.
 - Which static hosting target will be used, and what headers/404 behavior does it require?

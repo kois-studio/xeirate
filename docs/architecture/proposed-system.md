@@ -21,7 +21,7 @@ The implementation keeps these responsibilities separate:
 
 - `domain`: participants, month sessions, conditions, candidate schedule models, conflict/fairness concepts, and pure validation.
 - `persistence`: versioned localStorage envelope, migrations, safe parsing, and browser capability handling.
-    - `scheduling`: deterministic candidate generation and scoring within the provisional demo rule set.
+- `scheduling`: deterministic candidate generation and scoring within the provisional demo rule set.
 - `ui`: Astro pages and the interactive workspace; it translates coordinator actions into domain commands and displays outcomes.
 - `export`: share text plus print-to-PDF through the browser; a downloadable file/image format remains open.
 
@@ -29,13 +29,15 @@ The initial slice may keep these boundaries in a small number of files, but it m
 
 ## User workflow
 
-1. The coordinator introduces department participants using aliases.
-2. The coordinator starts a session for a specific month.
-3. The coordinator adds one structured condition at a time, choosing whether it is a hard restriction, a soft preference, or a request that needs clarification.
-4. The coordinator generates a candidate schedule after accepted conditions.
-5. The coordinator retries generation to explore another candidate with the same inputs.
-6. The coordinator reviews conflicts, clarification warnings, and fairness summary.
-7. The coordinator shares text or opens the browser print flow to save a PDF.
+1. The public landing explains the product and links to `/app`.
+2. The coordinator introduces department participants using aliases in `Personas`.
+3. The coordinator records fixed conditions for people, including recurring weekdays.
+4. The coordinator starts or selects a session for a specific month in `Sesiones`.
+5. The coordinator adds one structured condition at a time, choosing whether it is a hard requirement, a soft preference, or a request that needs clarification.
+6. The coordinator generates a candidate schedule after accepted conditions.
+7. The coordinator retries generation to explore another candidate with the same inputs.
+8. The coordinator reviews conflicts, clarification warnings, and fairness summary.
+9. The coordinator shares text or opens the browser print flow to save a PDF.
 
 The current implementation covers this workflow with one guardia per calendar day. The rule set remains provisional until the open domain questions are resolved; the app intentionally does not infer areas, doubletes, or institutional policies.
 

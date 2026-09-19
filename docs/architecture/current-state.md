@@ -20,13 +20,13 @@ The package scripts currently support development, formatting, linting, Astro ty
 
 ## User workflow currently in scope
 
-The first bounded slice now covers:
+The current browser workflow now covers:
 
-1. create or select a local participant list using aliases;
-2. create a monthly guardia session;
-3. persist that local setup in the browser; and
-4. translate a request into a provisional restriction, preference, or clarification condition;
-5. optionally attach a date range, coordinator note, and reusable flag; and
+1. enter and maintain a reusable local people list;
+2. add fixed person conditions, including recurring weekday rules;
+3. create and select monthly sessions;
+4. translate a request into a provisional requirement, preference, or clarification condition;
+5. edit a condition through a structured dialog or toggle requirement/preference directly;
 6. generate a deterministic monthly proposal from the structured conditions;
 7. retry with a different deterministic seed while keeping the same conditions;
 8. surface impossible days, broken preferences, and unresolved requests; and
@@ -36,8 +36,9 @@ The current scheduler assigns one guardia per calendar day. Restrictions are har
 
 ## Known gaps
 
-- Browser source is implemented under `src/`, with the Astro page at `src/pages/index.astro`, the Preact island at `src/components/WorkspaceApp.tsx`, and domain/persistence modules under `src/lib/`.
-- The current persisted schema is `schemaVersion: 3` under `xeirate.workspace`, validated with Zod. It contains participants, sessions, provisional conditions, and the latest generated schedule. Legacy `xeirate.workspace.v1` and `schemaVersion: 2` envelopes are migrated in memory and covered by deterministic tests.
+- The public landing is `src/pages/index.astro`; the local application is `src/pages/app.astro`; the interactive workspace is `src/components/WorkspaceApp.tsx`; domain/persistence modules remain under `src/lib/`.
+- The current persisted schema is `schemaVersion: 4` under `xeirate.workspace`, validated with Zod. It contains participants, sessions, session conditions, reusable person conditions, and the latest generated schedule. Legacy `xeirate.workspace.v1` and schema versions 2–3 are migrated in memory and covered by deterministic tests.
+- The application separates the reusable `Personas` view from the monthly `Sesiones` view. Fixed conditions use `sessionId: null` and can recur on a weekday; session conditions are scoped to one month.
 - The scheduling engine is a local deterministic heuristic in `src/lib/scheduler.ts`; retrying increments the attempt seed and never uploads data.
 - `src/lib/demo-fixture.ts` contains only synthetic aliases and anonymized November-style conditions for product review. Private discovery context remains in ignored `docs/SPEC.md`.
 - No browser journey or rendered accessibility audit is configured yet.

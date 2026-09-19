@@ -204,12 +204,12 @@ compliance:
       next_action: Scaffold Astro as the primary rendering model.
     - id: ASTRO-003
       status: compliant
-      evidence: src/components/WorkspaceApp.tsx, src/pages/index.astro
+      evidence: src/components/WorkspaceApp.tsx, src/pages/index.astro, src/pages/app.astro
       priority: medium
       next_action: Keep client-side code inside the scheduling workspace island.
     - id: ASTRO-007
       status: compliant
-      evidence: src/pages/index.astro, docs/architecture/proposed-system.md
+      evidence: src/pages/index.astro, src/pages/app.astro, docs/architecture/proposed-system.md
       priority: high
       next_action: Document and review each interactive island boundary.
     - id: ASTRO-009
