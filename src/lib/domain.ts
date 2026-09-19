@@ -8,11 +8,43 @@ export const participantSchema = z.object({
     alias: z.string().trim().min(1).max(40),
 });
 
-export const sessionSchema = z.object({
+const sessionBaseSchema = z.object({
     id: identifierSchema,
     month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/),
     participantIds: z.array(identifierSchema).max(100),
     createdAt: z.iso.datetime(),
+});
+
+export const scheduleAssignmentSchema = z.object({
+    date: dateSchema,
+    participantId: identifierSchema,
+});
+
+export const scheduleIssueSchema = z.object({
+    id: identifierSchema,
+    severity: z.enum(['error', 'warning', 'info']),
+    kind: z.enum(['unassigned', 'preference', 'clarification']),
+    date: dateSchema.nullable(),
+    participantId: identifierSchema.nullable(),
+    message: z.string().trim().min(1).max(240),
+});
+
+export const scheduleSchema = z.object({
+    attempt: z.number().int().nonnegative(),
+    generatedAt: z.iso.datetime(),
+    assignments: z.array(scheduleAssignmentSchema).max(31),
+    score: z.number().refine(Number.isFinite, { message: 'The score must be finite.' }),
+    fairness: z.object({
+        minAssignments: z.number().int().nonnegative(),
+        maxAssignments: z.number().int().nonnegative(),
+        maxDifference: z.number().int().nonnegative(),
+        preferenceBreaks: z.number().int().nonnegative(),
+    }),
+    issues: z.array(scheduleIssueSchema).max(1000),
+});
+
+export const sessionSchema = sessionBaseSchema.extend({
+    schedule: scheduleSchema.nullable(),
 });
 
 export const conditionSchema = z
@@ -21,6 +53,7 @@ export const conditionSchema = z
         sessionId: identifierSchema,
         participantId: identifierSchema,
         kind: z.enum(['restriction', 'preference', 'clarification']),
+        preferenceMode: z.enum(['avoid', 'prefer']).nullable(),
         startDate: dateSchema.nullable(),
         endDate: dateSchema.nullable(),
         note: z.string().trim().min(1).max(180),
@@ -35,20 +68,51 @@ export const conditionSchema = z
                 message: 'The end date must not be before the start date.',
             });
         }
+        if (condition.kind === 'preference' && !condition.preferenceMode) {
+            context.addIssue({
+                code: 'custom',
+                path: ['preferenceMode'],
+                message: 'A preference needs an avoid or prefer mode.',
+            });
+        }
+        if (condition.kind !== 'preference' && condition.preferenceMode) {
+            context.addIssue({
+                code: 'custom',
+                path: ['preferenceMode'],
+                message: 'Only preferences can have a preference mode.',
+            });
+        }
     });
 
-const sessionWorkspaceSchema = z.object({
+const legacyConditionSchema = z.object({
+    id: identifierSchema,
+    sessionId: identifierSchema,
+    participantId: identifierSchema,
+    kind: z.enum(['restriction', 'preference', 'clarification']),
+    startDate: dateSchema.nullable(),
+    endDate: dateSchema.nullable(),
+    note: z.string().trim().min(1).max(180),
+    reusable: z.boolean(),
+    createdAt: z.iso.datetime(),
+});
+
+const sessionWorkspaceSchemaV1 = z.object({
     participants: z.array(participantSchema).max(100),
-    sessions: z.array(sessionSchema).max(24),
+    sessions: z.array(sessionBaseSchema).max(24),
     activeSessionId: identifierSchema.nullable(),
 });
 
-export const workspaceSchema = sessionWorkspaceSchema.extend({
+const sessionWorkspaceSchemaV2 = sessionWorkspaceSchemaV1.extend({
+    conditions: z.array(legacyConditionSchema).max(1000),
+});
+
+export const workspaceSchema = sessionWorkspaceSchemaV1.extend({
+    sessions: z.array(sessionSchema).max(24),
     conditions: z.array(conditionSchema).max(1000),
 });
 
 export const storageEnvelopeSchema = z.object({
-    schemaVersion: z.literal(2),
+    schemaVersion: z.literal(3),
     updatedAt: z.iso.datetime(),
     workspace: workspaceSchema,
 });
@@ -56,13 +120,22 @@ export const storageEnvelopeSchema = z.object({
 export const legacyStorageEnvelopeSchema = z.object({
     schemaVersion: z.literal(1),
     updatedAt: z.iso.datetime(),
-    workspace: sessionWorkspaceSchema,
+    workspace: sessionWorkspaceSchemaV1,
+});
+
+export const legacyStorageEnvelopeV2Schema = z.object({
+    schemaVersion: z.literal(2),
+    updatedAt: z.iso.datetime(),
+    workspace: sessionWorkspaceSchemaV2,
 });
 
 export type Participant = z.infer<typeof participantSchema>;
 export type Session = z.infer<typeof sessionSchema>;
 export type Condition = z.infer<typeof conditionSchema>;
 export type ConditionKind = Condition['kind'];
+export type PreferenceMode = NonNullable<Condition['preferenceMode']>;
+export type Schedule = z.infer<typeof scheduleSchema>;
+export type ScheduleIssue = z.infer<typeof scheduleIssueSchema>;
 export type Workspace = z.infer<typeof workspaceSchema>;
 export type StorageEnvelope = z.infer<typeof storageEnvelopeSchema>;
 
@@ -91,10 +164,37 @@ export function createCondition(input: Condition): Condition {
     return conditionSchema.parse(input);
 }
 
+function migrateCondition(condition: z.infer<typeof legacyConditionSchema>): Condition {
+    return {
+        ...condition,
+        preferenceMode: condition.kind === 'preference' ? 'avoid' : null,
+    };
+}
+
+function migrateSessions(
+    sessions: z.infer<typeof sessionWorkspaceSchemaV1>['sessions'],
+): Session[] {
+    return sessions.map((session) => ({ ...session, schedule: null }));
+}
+
 export function migrateLegacyWorkspace(
-    workspace: z.infer<typeof sessionWorkspaceSchema>,
+    workspace: z.infer<typeof sessionWorkspaceSchemaV1>,
 ): Workspace {
-    return { ...workspace, conditions: [] };
+    return {
+        ...workspace,
+        sessions: migrateSessions(workspace.sessions),
+        conditions: [],
+    };
+}
+
+export function migrateSchemaTwoWorkspace(
+    workspace: z.infer<typeof sessionWorkspaceSchemaV2>,
+): Workspace {
+    return {
+        ...workspace,
+        sessions: migrateSessions(workspace.sessions),
+        conditions: workspace.conditions.map(migrateCondition),
+    };
 }
 
 export function getDaysInMonth(month: string): number {

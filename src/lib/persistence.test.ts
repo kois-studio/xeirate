@@ -50,6 +50,7 @@ describe('workspace persistence', () => {
                     month: '2026-11',
                     participantIds: ['person-1'],
                     createdAt: '2026-09-19T10:00:00.000Z',
+                    schedule: null,
                 },
             ],
             activeSessionId: 'session-1',
@@ -103,6 +104,46 @@ describe('workspace persistence', () => {
         expect(result.status).toBe('migrated');
         expect(result.workspace.conditions).toEqual([]);
         expect(result.workspace.participants[0]?.alias).toBe('Lúa');
+    });
+
+    test('migrates the condition schema before schedules are introduced', () => {
+        const schemaTwo = createMemoryStorage(
+            JSON.stringify({
+                schemaVersion: 2,
+                updatedAt: '2026-09-19T10:00:00.000Z',
+                workspace: {
+                    participants: [{ id: 'person-1', alias: 'Lúa' }],
+                    sessions: [
+                        {
+                            id: 'session-1',
+                            month: '2026-11',
+                            participantIds: ['person-1'],
+                            createdAt: '2026-09-19T10:00:00.000Z',
+                        },
+                    ],
+                    activeSessionId: 'session-1',
+                    conditions: [
+                        {
+                            id: 'condition-1',
+                            sessionId: 'session-1',
+                            participantId: 'person-1',
+                            kind: 'preference',
+                            startDate: '2026-11-05',
+                            endDate: '2026-11-08',
+                            note: 'Intentar evitar estos días.',
+                            reusable: false,
+                            createdAt: '2026-09-19T10:00:00.000Z',
+                        },
+                    ],
+                },
+            }),
+        );
+
+        const result = loadWorkspace(schemaTwo);
+
+        expect(result.status).toBe('migrated');
+        expect(result.workspace.sessions[0]?.schedule).toBeNull();
+        expect(result.workspace.conditions[0]?.preferenceMode).toBe('avoid');
     });
 
     test('clears the local workspace through the storage boundary', () => {

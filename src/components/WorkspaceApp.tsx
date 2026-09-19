@@ -12,6 +12,7 @@ import {
     type Condition,
     type ConditionKind,
     type Participant,
+    type PreferenceMode,
     type Session,
     type Workspace,
 } from '../lib/domain';
@@ -67,6 +68,7 @@ export default function WorkspaceApp(): JSX.Element {
     const [storageReady, setStorageReady] = useState(false);
     const [conditionPersonId, setConditionPersonId] = useState('');
     const [conditionKind, setConditionKind] = useState<ConditionKind>('restriction');
+    const [conditionPreferenceMode, setConditionPreferenceMode] = useState<PreferenceMode>('avoid');
     const [conditionStartDate, setConditionStartDate] = useState('');
     const [conditionEndDate, setConditionEndDate] = useState('');
     const [conditionNote, setConditionNote] = useState('');
@@ -205,6 +207,7 @@ export default function WorkspaceApp(): JSX.Element {
             month,
             participantIds: workspace.participants.map((participant) => participant.id),
             createdAt: new Date().toISOString(),
+            schedule: null,
         });
         setWorkspace((current) => ({
             ...current,
@@ -241,6 +244,7 @@ export default function WorkspaceApp(): JSX.Element {
             sessionId: activeSession.id,
             participantId,
             kind: conditionKind,
+            preferenceMode: conditionKind === 'preference' ? conditionPreferenceMode : null,
             startDate: conditionStartDate || null,
             endDate: conditionEndDate || null,
             note: normalizedNote,
@@ -402,6 +406,24 @@ export default function WorkspaceApp(): JSX.Element {
                                     <option value="clarification">Necesita aclaración</option>
                                 </select>
                             </div>
+                            {conditionKind === 'preference' ? (
+                                <div>
+                                    <label for="condition-preference-mode">Cómo aplicarla</label>
+                                    <select
+                                        id="condition-preference-mode"
+                                        name="condition-preference-mode"
+                                        value={conditionPreferenceMode}
+                                        onChange={(event) =>
+                                            setConditionPreferenceMode(
+                                                event.currentTarget.value as PreferenceMode,
+                                            )
+                                        }
+                                    >
+                                        <option value="avoid">Intentar evitar</option>
+                                        <option value="prefer">Intentar asignar</option>
+                                    </select>
+                                </div>
+                            ) : null}
                         </div>
                         <div class="condition-date-fields">
                             <div>
