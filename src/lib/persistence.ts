@@ -2,8 +2,10 @@ import {
     emptyWorkspace,
     legacyStorageEnvelopeSchema,
     legacyStorageEnvelopeV2Schema,
+    legacyStorageEnvelopeV3Schema,
     migrateLegacyWorkspace,
     migrateSchemaTwoWorkspace,
+    migrateSchemaThreeWorkspace,
     storageEnvelopeSchema,
     type StorageEnvelope,
     type Workspace,
@@ -50,6 +52,14 @@ export function loadWorkspace(storage: StorageLike | undefined): LoadResult {
             return { status: 'loaded', workspace: currentResult.data.workspace };
         }
 
+        const schemaThreeResult = legacyStorageEnvelopeV3Schema.safeParse(parsed);
+        if (schemaThreeResult.success) {
+            return {
+                status: 'migrated',
+                workspace: migrateSchemaThreeWorkspace(schemaThreeResult.data.workspace),
+            };
+        }
+
         const schemaTwoResult = legacyStorageEnvelopeV2Schema.safeParse(parsed);
         if (schemaTwoResult.success) {
             return {
@@ -84,7 +94,7 @@ export function saveWorkspace(
     }
 
     const envelope: StorageEnvelope = {
-        schemaVersion: 3,
+        schemaVersion: 4,
         updatedAt,
         workspace,
     };

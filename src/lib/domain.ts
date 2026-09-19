@@ -15,6 +15,19 @@ const sessionBaseSchema = z.object({
     createdAt: z.iso.datetime(),
 });
 
+const conditionSchemaV3 = z.object({
+    id: identifierSchema,
+    sessionId: identifierSchema,
+    participantId: identifierSchema,
+    kind: z.enum(['restriction', 'preference', 'clarification']),
+    preferenceMode: z.enum(['avoid', 'prefer']).nullable(),
+    startDate: dateSchema.nullable(),
+    endDate: dateSchema.nullable(),
+    note: z.string().trim().min(1).max(180),
+    reusable: z.boolean(),
+    createdAt: z.iso.datetime(),
+});
+
 export const scheduleAssignmentSchema = z.object({
     date: dateSchema,
     participantId: identifierSchema,
@@ -50,12 +63,13 @@ export const sessionSchema = sessionBaseSchema.extend({
 export const conditionSchema = z
     .object({
         id: identifierSchema,
-        sessionId: identifierSchema,
+        sessionId: identifierSchema.nullable(),
         participantId: identifierSchema,
         kind: z.enum(['restriction', 'preference', 'clarification']),
         preferenceMode: z.enum(['avoid', 'prefer']).nullable(),
         startDate: dateSchema.nullable(),
         endDate: dateSchema.nullable(),
+        weekday: z.number().int().min(0).max(6).nullable(),
         note: z.string().trim().min(1).max(180),
         reusable: z.boolean(),
         createdAt: z.iso.datetime(),
@@ -106,13 +120,20 @@ const sessionWorkspaceSchemaV2 = sessionWorkspaceSchemaV1.extend({
     conditions: z.array(legacyConditionSchema).max(1000),
 });
 
+const sessionWorkspaceSchemaV3 = z.object({
+    participants: z.array(participantSchema).max(100),
+    sessions: z.array(sessionSchema).max(24),
+    activeSessionId: identifierSchema.nullable(),
+    conditions: z.array(conditionSchemaV3).max(1000),
+});
+
 export const workspaceSchema = sessionWorkspaceSchemaV1.extend({
     sessions: z.array(sessionSchema).max(24),
     conditions: z.array(conditionSchema).max(1000),
 });
 
 export const storageEnvelopeSchema = z.object({
-    schemaVersion: z.literal(3),
+    schemaVersion: z.literal(4),
     updatedAt: z.iso.datetime(),
     workspace: workspaceSchema,
 });
@@ -127,6 +148,12 @@ export const legacyStorageEnvelopeV2Schema = z.object({
     schemaVersion: z.literal(2),
     updatedAt: z.iso.datetime(),
     workspace: sessionWorkspaceSchemaV2,
+});
+
+export const legacyStorageEnvelopeV3Schema = z.object({
+    schemaVersion: z.literal(3),
+    updatedAt: z.iso.datetime(),
+    workspace: sessionWorkspaceSchemaV3,
 });
 
 export type Participant = z.infer<typeof participantSchema>;
@@ -168,6 +195,14 @@ function migrateCondition(condition: z.infer<typeof legacyConditionSchema>): Con
     return {
         ...condition,
         preferenceMode: condition.kind === 'preference' ? 'avoid' : null,
+        weekday: null,
+    };
+}
+
+function migrateSchemaThreeCondition(condition: z.infer<typeof conditionSchemaV3>): Condition {
+    return {
+        ...condition,
+        weekday: null,
     };
 }
 
@@ -194,6 +229,15 @@ export function migrateSchemaTwoWorkspace(
         ...workspace,
         sessions: migrateSessions(workspace.sessions),
         conditions: workspace.conditions.map(migrateCondition),
+    };
+}
+
+export function migrateSchemaThreeWorkspace(
+    workspace: z.infer<typeof sessionWorkspaceSchemaV3>,
+): Workspace {
+    return {
+        ...workspace,
+        conditions: workspace.conditions.map(migrateSchemaThreeCondition),
     };
 }
 

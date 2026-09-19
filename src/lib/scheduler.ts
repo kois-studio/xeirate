@@ -26,6 +26,10 @@ function dateForDay(month: string, day: number): string {
 }
 
 function conditionApplies(condition: Condition, date: string): boolean {
+    if (condition.weekday !== null && new Date(`${date}T12:00:00`).getDay() !== condition.weekday) {
+        return false;
+    }
+
     return (
         (!condition.startDate || condition.startDate <= date) &&
         (!condition.endDate || condition.endDate >= date)
@@ -70,7 +74,9 @@ export function generateSchedule({
 }: ScheduleInput): Schedule {
     const random = createRandom(`${session.id}:${attempt}`);
     const days = getDaysInMonth(session.month);
-    const sessionConditions = conditions.filter((condition) => condition.sessionId === session.id);
+    const sessionConditions = conditions.filter(
+        (condition) => condition.sessionId === null || condition.sessionId === session.id,
+    );
     const assignmentCounts = new Map(participants.map((participant) => [participant.id, 0]));
     const weekendCounts = new Map(participants.map((participant) => [participant.id, 0]));
     const assignments: Schedule['assignments'] = [];

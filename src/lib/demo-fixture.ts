@@ -16,12 +16,13 @@ const demoParticipants = [
 
 function demoCondition(
     input: Pick<Condition, 'id' | 'participantId' | 'kind' | 'startDate' | 'endDate' | 'note'> &
-        Partial<Pick<Condition, 'preferenceMode' | 'reusable'>>,
+        Partial<Pick<Condition, 'preferenceMode' | 'reusable' | 'weekday' | 'sessionId'>>,
 ): Condition {
     return createCondition({
         ...input,
-        sessionId: demoSessionId,
+        sessionId: input.sessionId ?? demoSessionId,
         preferenceMode: input.kind === 'preference' ? (input.preferenceMode ?? 'avoid') : null,
+        weekday: input.weekday ?? null,
         reusable: input.reusable ?? false,
         createdAt,
     });
@@ -41,6 +42,17 @@ export function createDemoWorkspace(): Workspace {
         sessions: [session],
         activeSessionId: session.id,
         conditions: [
+            demoCondition({
+                id: 'demo-rio-fixed-tuesday',
+                sessionId: null,
+                participantId: 'demo-rio',
+                kind: 'restriction',
+                weekday: 2,
+                startDate: null,
+                endDate: null,
+                note: 'Condición fija: no trabaja los martes.',
+                reusable: true,
+            }),
             demoCondition({
                 id: 'demo-nube-course',
                 participantId: 'demo-nube',

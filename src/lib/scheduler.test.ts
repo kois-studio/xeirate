@@ -26,6 +26,7 @@ const conditions: Condition[] = [
         preferenceMode: null,
         startDate: '2026-11-01',
         endDate: '2026-11-05',
+        weekday: null,
         note: 'No disponible esos días.',
         reusable: false,
         createdAt: '2026-09-19T10:00:00.000Z',
@@ -38,6 +39,7 @@ const conditions: Condition[] = [
         preferenceMode: 'avoid',
         startDate: '2026-11-06',
         endDate: '2026-11-08',
+        weekday: null,
         note: 'Preferiría evitar esos días.',
         reusable: false,
         createdAt: '2026-09-19T10:00:00.000Z',
@@ -50,6 +52,7 @@ const conditions: Condition[] = [
         preferenceMode: null,
         startDate: null,
         endDate: null,
+        weekday: null,
         note: 'Revisar una petición interna.',
         reusable: false,
         createdAt: '2026-09-19T10:00:00.000Z',
@@ -90,6 +93,7 @@ describe('schedule generation', () => {
                     preferenceMode: null,
                     startDate: '2026-11-06',
                     endDate: '2026-11-08',
+                    weekday: null,
                     note: 'Tampoco está disponible durante estos días.',
                     reusable: false,
                     createdAt: '2026-09-19T10:00:00.000Z',
@@ -141,6 +145,7 @@ describe('schedule generation', () => {
                     preferenceMode: null,
                     startDate: null,
                     endDate: null,
+                    weekday: null,
                     note: 'No disponible este mes.',
                     reusable: false,
                     createdAt: '2026-09-19T10:00:00.000Z',
@@ -152,5 +157,37 @@ describe('schedule generation', () => {
 
         expect(result.assignments).toHaveLength(0);
         expect(result.issues.filter((item) => item.kind === 'unassigned')).toHaveLength(30);
+    });
+
+    test('applies fixed weekday restrictions to the generated session', () => {
+        const result = generateSchedule({
+            session,
+            participants: participants.slice(0, 2),
+            conditions: [
+                {
+                    id: 'fixed-tuesday',
+                    sessionId: null,
+                    participantId: 'person-a',
+                    kind: 'restriction',
+                    preferenceMode: null,
+                    startDate: null,
+                    endDate: null,
+                    weekday: 2,
+                    note: 'No trabaja los martes.',
+                    reusable: true,
+                    createdAt: '2026-09-19T10:00:00.000Z',
+                },
+            ],
+            attempt: 1,
+            generatedAt: '2026-09-19T10:00:00.000Z',
+        });
+
+        expect(
+            result.assignments.some(
+                (assignment) =>
+                    new Date(`${assignment.date}T12:00:00`).getDay() === 2 &&
+                    assignment.participantId === 'person-a',
+            ),
+        ).toBe(false);
     });
 });

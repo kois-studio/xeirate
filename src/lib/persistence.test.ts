@@ -146,6 +146,48 @@ describe('workspace persistence', () => {
         expect(result.workspace.conditions[0]?.preferenceMode).toBe('avoid');
     });
 
+    test('migrates schema three conditions into the fixed-condition model', () => {
+        const schemaThree = createMemoryStorage(
+            JSON.stringify({
+                schemaVersion: 3,
+                updatedAt: '2026-09-19T10:00:00.000Z',
+                workspace: {
+                    participants: [{ id: 'person-1', alias: 'Lúa' }],
+                    sessions: [
+                        {
+                            id: 'session-1',
+                            month: '2026-11',
+                            participantIds: ['person-1'],
+                            createdAt: '2026-09-19T10:00:00.000Z',
+                            schedule: null,
+                        },
+                    ],
+                    activeSessionId: 'session-1',
+                    conditions: [
+                        {
+                            id: 'condition-1',
+                            sessionId: 'session-1',
+                            participantId: 'person-1',
+                            kind: 'restriction',
+                            preferenceMode: null,
+                            startDate: null,
+                            endDate: null,
+                            note: 'No trabaja durante una condición antigua.',
+                            reusable: false,
+                            createdAt: '2026-09-19T10:00:00.000Z',
+                        },
+                    ],
+                },
+            }),
+        );
+
+        const result = loadWorkspace(schemaThree);
+
+        expect(result.status).toBe('migrated');
+        expect(result.workspace.conditions[0]?.weekday).toBeNull();
+        expect(result.workspace.conditions[0]?.sessionId).toBe('session-1');
+    });
+
     test('clears the local workspace through the storage boundary', () => {
         const storage = createMemoryStorage();
         saveWorkspace(storage, emptyWorkspace(), '2026-09-19T10:00:00.000Z');
