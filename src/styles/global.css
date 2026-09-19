@@ -223,6 +223,10 @@ h1 {
     grid-column: 1 / -1;
 }
 
+.condition-card {
+    grid-column: 1 / -1;
+}
+
 h2 {
     margin-bottom: 0.65rem;
     font-size: 1.3rem;
@@ -238,7 +242,8 @@ h2 {
 }
 
 .inline-form label,
-.month-form label {
+.month-form label,
+.condition-form label {
     display: block;
     margin-bottom: 0.45rem;
     font-size: 0.82rem;
@@ -253,7 +258,9 @@ h2 {
     gap: 0.65rem;
 }
 
-input {
+input,
+select,
+textarea {
     width: 100%;
     min-height: 2.75rem;
     padding: 0.6rem 0.8rem;
@@ -261,6 +268,16 @@ input {
     border-radius: 0.65rem;
     color: var(--ink);
     background: var(--white);
+}
+
+select,
+textarea {
+    font-size: 0.88rem;
+}
+
+textarea {
+    min-height: 5.25rem;
+    resize: vertical;
 }
 
 .form-row input {
@@ -377,6 +394,128 @@ input::placeholder {
 
 .month-form > div {
     width: min(100%, 14rem);
+}
+
+.condition-fields,
+.condition-date-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+}
+
+.condition-form > div + div {
+    margin-top: 0.85rem;
+}
+
+.condition-form-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.reusable-toggle {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    cursor: pointer;
+}
+
+.reusable-toggle input {
+    width: 1rem;
+    min-height: 1rem;
+    margin-top: 0.15rem;
+    accent-color: var(--green);
+}
+
+.reusable-toggle span {
+    display: grid;
+    gap: 0.2rem;
+}
+
+.reusable-toggle strong {
+    font-size: 0.78rem;
+}
+
+.reusable-toggle small {
+    color: var(--muted);
+    font-size: 0.7rem;
+}
+
+.conditions-list {
+    display: grid;
+    gap: 0.65rem;
+    margin: 1.25rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.conditions-list li {
+    padding: 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: 0.8rem;
+    background: var(--paper);
+}
+
+.condition-list-heading,
+.condition-tags,
+.condition-meta {
+    display: flex;
+    align-items: center;
+}
+
+.condition-list-heading {
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.condition-tags {
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.condition-tags strong {
+    font-size: 0.85rem;
+}
+
+.condition-badge {
+    padding: 0.3rem 0.5rem;
+    border-radius: 99px;
+    font-size: 0.65rem;
+    font-weight: 750;
+}
+
+.condition-badge.restriction {
+    color: #8a4c37;
+    background: #f8d9cb;
+}
+
+.condition-badge.preference {
+    color: #76601c;
+    background: var(--yellow);
+}
+
+.condition-badge.clarification {
+    color: #456477;
+    background: #d9edf5;
+}
+
+.condition-copy {
+    margin: 0.7rem 0;
+    color: var(--ink);
+    font-size: 0.85rem;
+    line-height: 1.45;
+}
+
+.condition-meta {
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    color: var(--muted);
+    font-size: 0.7rem;
+}
+
+.condition-empty {
+    margin-top: 1.1rem;
 }
 
 .status-message {
@@ -595,6 +734,7 @@ input::placeholder {
     }
 
     .calendar-card,
+    .condition-card,
     .workspace-actions {
         grid-column: auto;
     }
@@ -606,6 +746,20 @@ input::placeholder {
 
     .calendar-grid {
         grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .condition-fields,
+    .condition-date-fields {
+        grid-template-columns: 1fr;
+    }
+
+    .condition-form-footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .condition-form-footer .button {
+        width: 100%;
     }
 
     .site-footer {

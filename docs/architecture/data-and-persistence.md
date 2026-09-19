@@ -16,16 +16,18 @@ type StorageEnvelope = {
 };
 ```
 
-The exact `Workspace` contract is an implementation task. Runtime validation is required when reading localStorage. Invalid or unsupported data must be rejected safely, with a recoverable reset path and no silent corruption.
+The current workspace contains participants, month sessions, and provisional conditions. A condition has a person, session, kind (`restriction`, `preference`, or `clarification`), optional start/end dates, a coordinator note, a reusable flag, and a creation timestamp. These kinds support translation and review; they do not yet drive a scheduling solver.
+
+The current envelope is `schemaVersion: 2` stored under `xeirate.workspace`. Runtime validation is required when reading localStorage. Invalid or unsupported data must be rejected safely, with a recoverable reset path and no silent corruption.
 
 ## Lifecycle
 
-- Create: when the coordinator saves participants or a session.
+- Create: when the coordinator saves participants, a session, or a condition.
 - Read: on application startup, after schema validation.
 - Update: after accepted user actions, using a deterministic serialization path.
 - Delete/reset: through an explicit user action that clearly states the local scope.
 - Export: creates a user-controlled file or rendered artifact; it does not upload data.
-- Migration: schema versions must have named migration functions and tests before a new persisted shape is released.
+- Migration: the implemented v1-to-v2 migration adds an empty condition collection without losing existing participants or sessions. Future schema versions need named migration functions and tests before release.
 
 ## Validation and safety
 

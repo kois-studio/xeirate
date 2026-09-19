@@ -2,12 +2,16 @@ import { useEffect, useMemo, useState } from 'preact/hooks';
 import type { JSX, TargetedEvent } from 'preact';
 
 import {
+    createCondition,
     createIdentifier,
     createSession,
     emptyWorkspace,
     formatMonth,
     getDaysInMonth,
     isValidMonth,
+    type Condition,
+    type ConditionKind,
+    type Participant,
     type Session,
     type Workspace,
 } from '../lib/domain';
@@ -22,12 +26,51 @@ function monthLabel(month: string): string {
     return formatMonth(month).replace(/^./, (character) => character.toUpperCase());
 }
 
+function conditionKindLabel(kind: ConditionKind): string {
+    switch (kind) {
+        case 'restriction':
+            return 'Restricción';
+        case 'preference':
+            return 'Preferencia';
+        case 'clarification':
+            return 'Por aclarar';
+    }
+}
+
+function conditionDateLabel(condition: Condition): string {
+    if (!condition.startDate && !condition.endDate) {
+        return 'Todo el mes';
+    }
+
+    const formatter = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' });
+    const formatDate = (value: string): string =>
+        formatter.format(new Date(`${value}T12:00:00`)).replace('.', '');
+
+    if (condition.startDate && condition.endDate) {
+        return `${formatDate(condition.startDate)} – ${formatDate(condition.endDate)}`;
+    }
+
+    return condition.startDate
+        ? `Desde ${formatDate(condition.startDate)}`
+        : `Hasta ${formatDate(condition.endDate ?? '')}`;
+}
+
+function lastDateOfMonth(month: string): string {
+    return `${month}-${String(getDaysInMonth(month)).padStart(2, '0')}`;
+}
+
 export default function WorkspaceApp(): JSX.Element {
     const [workspace, setWorkspace] = useState<Workspace>(emptyWorkspace);
     const [alias, setAlias] = useState('');
     const [month, setMonth] = useState(currentMonth);
     const [notice, setNotice] = useState('');
     const [storageReady, setStorageReady] = useState(false);
+    const [conditionPersonId, setConditionPersonId] = useState('');
+    const [conditionKind, setConditionKind] = useState<ConditionKind>('restriction');
+    const [conditionStartDate, setConditionStartDate] = useState('');
+    const [conditionEndDate, setConditionEndDate] = useState('');
+    const [conditionNote, setConditionNote] = useState('');
+    const [conditionReusable, setConditionReusable] = useState(false);
 
     useEffect(() => {
         const result = loadWorkspace(window.localStorage);
@@ -65,6 +108,41 @@ export default function WorkspaceApp(): JSX.Element {
         () => workspace.sessions.find((session) => session.id === workspace.activeSessionId),
         [workspace.sessions, workspace.activeSessionId],
     );
+
+    const activeParticipants = useMemo<Participant[]>(() => {
+        if (!activeSession) {
+            return [];
+        }
+
+        return activeSession.participantIds.flatMap((participantId) => {
+            const participant = workspace.participants.find((item) => item.id === participantId);
+            return participant ? [participant] : [];
+        });
+    }, [activeSession, workspace.participants]);
+
+    const activeConditions = useMemo<Condition[]>(
+        () =>
+            activeSession
+                ? workspace.conditions.filter(
+                      (condition) => condition.sessionId === activeSession.id,
+                  )
+                : [],
+        [activeSession, workspace.conditions],
+    );
+
+    useEffect(() => {
+        const firstParticipant = activeParticipants[0];
+        if (!firstParticipant) {
+            setConditionPersonId('');
+            return;
+        }
+
+        setConditionPersonId((current) =>
+            activeParticipants.some((participant) => participant.id === current)
+                ? current
+                : firstParticipant.id,
+        );
+    }, [activeParticipants]);
 
     function addParticipant(event: TargetedEvent<HTMLFormElement, SubmitEvent>): void {
         event.preventDefault();
@@ -104,6 +182,9 @@ export default function WorkspaceApp(): JSX.Element {
                 ...session,
                 participantIds: session.participantIds.filter((id) => id !== participantId),
             })),
+            conditions: current.conditions.filter(
+                (condition) => condition.participantId !== participantId,
+            ),
         }));
         setNotice('Persona eliminada de la lista y de las sesiones locales.');
     }
@@ -131,6 +212,58 @@ export default function WorkspaceApp(): JSX.Element {
             activeSessionId: session.id,
         }));
         setNotice(`Sesión de ${monthLabel(month)} preparada.`);
+    }
+
+    function addCondition(event: TargetedEvent<HTMLFormElement, SubmitEvent>): void {
+        event.preventDefault();
+        if (!activeSession) {
+            setNotice('Prepara una sesión antes de añadir condiciones.');
+            return;
+        }
+
+        const participantId = conditionPersonId || activeParticipants[0]?.id;
+        const normalizedNote = conditionNote.trim();
+        if (!participantId) {
+            setNotice('Añade una persona a la sesión antes de registrar una condición.');
+            return;
+        }
+        if (!normalizedNote) {
+            setNotice('Escribe una nota para explicar la petición.');
+            return;
+        }
+        if (conditionStartDate && conditionEndDate && conditionStartDate > conditionEndDate) {
+            setNotice('La fecha final no puede ser anterior a la fecha inicial.');
+            return;
+        }
+
+        const condition = createCondition({
+            id: createIdentifier('condition'),
+            sessionId: activeSession.id,
+            participantId,
+            kind: conditionKind,
+            startDate: conditionStartDate || null,
+            endDate: conditionEndDate || null,
+            note: normalizedNote,
+            reusable: conditionReusable,
+            createdAt: new Date().toISOString(),
+        });
+        setWorkspace((current) => ({
+            ...current,
+            conditions: [...current.conditions, condition],
+        }));
+        setConditionStartDate('');
+        setConditionEndDate('');
+        setConditionNote('');
+        setConditionReusable(false);
+        setNotice('Condición añadida a la sesión.');
+    }
+
+    function removeCondition(conditionId: string): void {
+        setWorkspace((current) => ({
+            ...current,
+            conditions: current.conditions.filter((condition) => condition.id !== conditionId),
+        }));
+        setNotice('Condición eliminada de la sesión.');
     }
 
     function resetWorkspace(): void {
@@ -225,6 +358,164 @@ export default function WorkspaceApp(): JSX.Element {
                     </button>
                 </form>
             </section>
+
+            {activeSession ? (
+                <section class="workspace-card condition-card" aria-labelledby="condition-title">
+                    <div class="section-kicker">Tercer paso</div>
+                    <h2 id="condition-title">Traduce una petición</h2>
+                    <p class="section-intro">
+                        Convierte lo que te han pedido en una nota estructurada. Xeirate todavía no
+                        decide el calendario: primero te ayuda a no perder ningún detalle.
+                    </p>
+
+                    <form class="condition-form" onSubmit={addCondition}>
+                        <div class="condition-fields">
+                            <div>
+                                <label for="condition-person">Persona</label>
+                                <select
+                                    id="condition-person"
+                                    name="condition-person"
+                                    value={conditionPersonId}
+                                    onChange={(event) =>
+                                        setConditionPersonId(event.currentTarget.value)
+                                    }
+                                >
+                                    {activeParticipants.map((participant) => (
+                                        <option key={participant.id} value={participant.id}>
+                                            {participant.alias}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label for="condition-kind">Tipo de petición</label>
+                                <select
+                                    id="condition-kind"
+                                    name="condition-kind"
+                                    value={conditionKind}
+                                    onChange={(event) =>
+                                        setConditionKind(event.currentTarget.value as ConditionKind)
+                                    }
+                                >
+                                    <option value="restriction">Restricción</option>
+                                    <option value="preference">Preferencia</option>
+                                    <option value="clarification">Necesita aclaración</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="condition-date-fields">
+                            <div>
+                                <label for="condition-start">Desde (opcional)</label>
+                                <input
+                                    id="condition-start"
+                                    name="condition-start"
+                                    type="date"
+                                    min={`${activeSession.month}-01`}
+                                    max={lastDateOfMonth(activeSession.month)}
+                                    value={conditionStartDate}
+                                    onInput={(event) =>
+                                        setConditionStartDate(event.currentTarget.value)
+                                    }
+                                />
+                            </div>
+                            <div>
+                                <label for="condition-end">Hasta (opcional)</label>
+                                <input
+                                    id="condition-end"
+                                    name="condition-end"
+                                    type="date"
+                                    min={`${activeSession.month}-01`}
+                                    max={lastDateOfMonth(activeSession.month)}
+                                    value={conditionEndDate}
+                                    onInput={(event) =>
+                                        setConditionEndDate(event.currentTarget.value)
+                                    }
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <label for="condition-note">Qué hay que tener en cuenta</label>
+                            <textarea
+                                id="condition-note"
+                                name="condition-note"
+                                rows={3}
+                                maxLength={180}
+                                placeholder="Ej. No puede hacer guardia durante el curso."
+                                value={conditionNote}
+                                onInput={(event) => setConditionNote(event.currentTarget.value)}
+                            />
+                        </div>
+                        <div class="condition-form-footer">
+                            <label class="reusable-toggle" for="condition-reusable">
+                                <input
+                                    id="condition-reusable"
+                                    name="condition-reusable"
+                                    type="checkbox"
+                                    checked={conditionReusable}
+                                    onChange={(event) =>
+                                        setConditionReusable(event.currentTarget.checked)
+                                    }
+                                />
+                                <span>
+                                    <strong>Recordar como condición fija</strong>
+                                    <small>
+                                        Se guardará como reutilizable para una futura sesión.
+                                    </small>
+                                </span>
+                            </label>
+                            <button class="button button-primary" type="submit">
+                                Añadir condición <span aria-hidden="true">+</span>
+                            </button>
+                        </div>
+                    </form>
+
+                    {activeConditions.length > 0 ? (
+                        <ul class="conditions-list" aria-label="Condiciones de la sesión">
+                            {activeConditions.map((condition) => {
+                                const participant = activeParticipants.find(
+                                    (item) => item.id === condition.participantId,
+                                );
+                                return (
+                                    <li key={condition.id}>
+                                        <div class="condition-list-heading">
+                                            <div class="condition-tags">
+                                                <span class={`condition-badge ${condition.kind}`}>
+                                                    {conditionKindLabel(condition.kind)}
+                                                </span>
+                                                <strong>
+                                                    {participant?.alias ?? 'Persona no disponible'}
+                                                </strong>
+                                            </div>
+                                            <button
+                                                class="icon-button"
+                                                type="button"
+                                                aria-label="Eliminar condición"
+                                                onClick={() => removeCondition(condition.id)}
+                                            >
+                                                <span aria-hidden="true">×</span>
+                                            </button>
+                                        </div>
+                                        <p class="condition-copy">{condition.note}</p>
+                                        <div class="condition-meta">
+                                            <span>{conditionDateLabel(condition)}</span>
+                                            {condition.reusable ? (
+                                                <span>⌁ Condición fija</span>
+                                            ) : null}
+                                        </div>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    ) : (
+                        <div class="empty-state compact condition-empty">
+                            <span class="empty-icon" aria-hidden="true">
+                                ✎
+                            </span>
+                            <span>Aún no hay peticiones estructuradas para este mes.</span>
+                        </div>
+                    )}
+                </section>
+            ) : null}
 
             <div class="workspace-actions">
                 <p class="status-message" role="status" aria-live="polite">

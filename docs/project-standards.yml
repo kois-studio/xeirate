@@ -153,20 +153,20 @@ compliance:
       priority: medium
       next_action: Add CI quality gates after the local scripts are available.
     - id: DATA-001
-      status: partial
-      evidence: docs/architecture/data-and-persistence.md
+      status: compliant
+      evidence: docs/architecture/data-and-persistence.md, src/lib/domain.ts, src/lib/persistence.ts
       priority: high
-      next_action: Define the first versioned persisted schema and migration behavior.
+      next_action: Version future condition and schedule changes with explicit migrations.
     - id: DATA-002
-      status: planned
-      evidence: docs/architecture/data-and-persistence.md
+      status: compliant
+      evidence: src/lib/domain.ts, src/lib/persistence.ts, src/lib/persistence.test.ts
       priority: high
-      next_action: Validate and version localStorage records before reading them.
+      next_action: Extend boundary validation as import/export is added.
     - id: DATA-003
-      status: planned
-      evidence: docs/architecture/data-and-persistence.md
+      status: compliant
+      evidence: src/lib/persistence.test.ts
       priority: high
-      next_action: Add deterministic tests for malformed, old, and missing local data.
+      next_action: Add migration tests for each future schema version.
     - id: STYLE-001
       status: compliant
       evidence: src/styles/global.css, docs/architecture/proposed-system.md

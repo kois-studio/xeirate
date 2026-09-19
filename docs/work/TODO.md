@@ -9,6 +9,7 @@
 - **Scope:** condition taxonomy, dates/ranges, areas, travel/courses, fixed reusable conditions, conflict explanation, concession/fairness record.
 - **Non-goals:** importing real workplace requests into tests or making clinical staffing policy decisions.
 - **Acceptance criteria:** To be defined after domain conversation and synthetic fixture review.
+- **Current implementation note:** A provisional intake schema and UI exist for translating notes; they must not be treated as final solver semantics.
 - **Verification:** domain examples, decision record, deterministic unit tests.
 - **Affected areas:** domain, scheduling, persistence, docs.
 - **Dependencies:** The initial implementation slice and answers to `docs/questions.md`.

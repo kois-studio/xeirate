@@ -20,19 +20,21 @@ The package scripts currently support development, formatting, linting, Astro ty
 
 ## User workflow currently in scope
 
-The first bounded slice is intended to cover:
+The first bounded slice now covers:
 
 1. create or select a local participant list using aliases;
 2. create a monthly guardia session;
 3. persist that local setup in the browser; and
-4. establish the scheduling workspace boundary for later conditions and generation.
+4. translate a request into a provisional restriction, preference, or clarification condition;
+5. optionally attach a date range, coordinator note, and reusable flag; and
+6. establish the scheduling workspace boundary for later generation.
 
-The current UI does not generate assignments. The solver, fairness policy, conflict resolution, reusable conditions, and export formats are not yet current implementation facts.
+The current UI does not generate assignments. The solver, fairness policy, conflict resolution, automatic reuse of fixed conditions, and export formats are not yet current implementation facts. The condition taxonomy is a provisional intake vocabulary, not a claim about the department's final scheduling policy.
 
 ## Known gaps
 
 - Browser source is implemented under `src/`, with the Astro page at `src/pages/index.astro`, the Preact island at `src/components/WorkspaceApp.tsx`, and domain/persistence modules under `src/lib/`.
-- The first persisted schema is implemented as `xeirate.workspace.v1` and validated with Zod. Migration functions are not yet needed because no later schema exists.
+- The current persisted schema is `schemaVersion: 2` under `xeirate.workspace`, validated with Zod. It contains participants, sessions, and provisional conditions. The legacy `xeirate.workspace.v1` envelope is migrated in memory and covered by deterministic tests.
 - No deterministic scheduler exists yet.
 - No browser journey or rendered accessibility audit is configured yet.
 - Hosting, PWA behavior, and export implementation remain open.
