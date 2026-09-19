@@ -1,0 +1,55 @@
+---
+// biome-ignore lint/correctness/noUnusedImports: Astro uses this component in the template.
+import WorkspaceApp from '../components/WorkspaceApp';
+import '../styles/global.css';
+---
+
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width" />
+		<meta
+			name="description"
+			content="Xeirate ayuda a preparar calendarios mensuales de guardias de forma clara y local."
+		/>
+		<meta name="generator" content={Astro.generator} />
+		<title>Xeirate · Calendarios de guardias sin líos</title>
+	</head>
+	<body>
+		<header class="site-header">
+			<a class="brand" href="/" aria-label="Xeirate, inicio">
+				<span class="brand-mark" aria-hidden="true">x</span>
+				<span>xeirate</span>
+			</a>
+			<span class="privacy-pill"><span aria-hidden="true">●</span> Todo en tu navegador</span>
+		</header>
+
+		<main>
+			<section class="hero" aria-labelledby="page-title">
+				<div class="hero-copy">
+					<p class="eyebrow"><span aria-hidden="true">✦</span> Guardias, pero con un poco más de calma</p>
+					<h1 id="page-title">Un calendario claro para un mes complicado.</h1>
+					<p class="hero-description">
+						Traduce peticiones, vacaciones y preferencias en una propuesta de guardias que puedas
+						revisar con tu equipo.
+					</p>
+				</div>
+				<div class="hero-orbit" aria-hidden="true">
+					<span class="orbit-dot dot-one" />
+					<span class="orbit-dot dot-two" />
+					<span class="orbit-dot dot-three" />
+					<span class="orbit-spark">✦</span>
+				</div>
+			</section>
+
+			<WorkspaceApp client:load />
+		</main>
+
+		<footer class="site-footer">
+			<span>Xeirate está en una primera versión.</span>
+			<span>Sin cuentas · Sin servidores · Sin sorpresas</span>
+		</footer>
+	</body>
+</html>

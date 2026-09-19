@@ -1,2 +1,15 @@
+# Astro build output
+/dist/
+/.astro/
+
+# Dependencies
+/node_modules/
+
+# Local environment and logs
+.env
+.env.*
+!.env.example
+*.log
+
 # The design specification contains private discovery context and remains local.
 /docs/SPEC.md

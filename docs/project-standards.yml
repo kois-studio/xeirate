@@ -1,0 +1,248 @@
+contract_version: 0.2.0
+standards_version: 0.4.0
+
+standards_source:
+  repository: https://github.com/kois-studio/engineering-standards
+  revision: f86132fea80126008895b65f76342aaa095e98be
+
+project:
+  name: xeirate
+  lifecycle: greenfield
+  maturity: early-implementation
+
+standards:
+  - documentation
+  - testing
+  - typescript
+  - security
+  - dependencies
+  - ci-cd
+  - data
+  - styling
+  - web
+  - operations
+
+profiles:
+  - astro-website
+
+compliance:
+  rules:
+    - id: DOC-001
+      status: compliant
+      evidence: docs/AGENTS.md, docs/README.md, README.md
+      priority: high
+      next_action: Keep the documentation index and current-state map synchronized with implementation.
+    - id: DOC-002
+      status: compliant
+      evidence: docs/README.md, docs/architecture/, docs/decisions/, docs/work/
+      priority: high
+      next_action: Add feature/workflow documentation as future slices become real.
+    - id: DOC-003
+      status: compliant
+      evidence: docs/README.md and linked documentation map
+      priority: medium
+      next_action: Validate maintained links during documentation changes.
+    - id: DOC-004
+      status: compliant
+      evidence: tracked docs use synthetic context; docs/SPEC.md is ignored
+      priority: high
+      next_action: Keep private discovery context out of tracked files and history.
+    - id: DOC-005
+      status: compliant
+      evidence: docs/project-standards.yml and docs/work/TODO.md
+      priority: high
+      next_action: Update evidence and status after each implementation slice.
+    - id: TEST-003
+      status: compliant
+      evidence: src/lib/persistence.test.ts, bun test
+      priority: high
+      next_action: Add deterministic domain and persistence-boundary tests with the first implementation slice.
+    - id: TEST-006
+      status: compliant
+      evidence: package.json, bun test
+      priority: high
+      next_action: Make the test command runnable locally and in CI.
+    - id: TEST-008
+      status: compliant
+      evidence: src/lib/persistence.test.ts, bun test
+      priority: high
+      next_action: Establish an automated quality baseline before calling the project implementation-ready.
+    - id: TS-001
+      status: compliant
+      evidence: tsconfig.json, bun run typecheck
+      priority: high
+      next_action: Enable strict compiler checks in the Astro scaffold.
+    - id: TS-005
+      status: compliant
+      evidence: architecture/data-and-persistence.md
+      priority: high
+      next_action: Extend runtime validation as import and condition boundaries are added.
+    - id: TS-007
+      status: compliant
+      evidence: tsconfig.json, biome.json, package.json
+      priority: high
+      next_action: Add committed TypeScript, formatter, and linter configuration.
+    - id: TS-009
+      status: compliant
+      evidence: tsconfig.json, bun run typecheck
+      priority: medium
+      next_action: Enable checked indexed access options in the scaffold.
+    - id: TS-010
+      status: compliant
+      evidence: tsconfig.json, bun run typecheck
+      priority: medium
+      next_action: Enable the required compiler quality checks.
+    - id: SEC-001
+      status: partial
+      evidence: docs/architecture/proposed-system.md and docs/architecture/data-and-persistence.md
+      priority: high
+      next_action: Keep trust boundaries updated when import/export or hosting is added.
+    - id: SEC-002
+      status: compliant
+      evidence: no secrets or runtime credentials are required by the local-only design
+      priority: high
+      next_action: Recheck bundles and repository history when integrations are considered.
+    - id: SEC-004
+      status: compliant
+      evidence: docs/architecture/data-and-persistence.md
+      priority: high
+      next_action: Extend schema validation to future import and condition boundaries.
+    - id: SEC-005
+      status: partial
+      evidence: local-only data boundary documented in docs/architecture/data-and-persistence.md
+      priority: high
+      next_action: Document retention/deletion behavior and minimize export contents.
+    - id: DEP-001
+      status: compliant
+      evidence: package.json, bun.lock
+      priority: high
+      next_action: Commit a reproducible lockfile with the scaffold.
+    - id: DEP-002
+      status: compliant
+      evidence: package.json packageManager, package.json engines
+      priority: medium
+      next_action: Pin the Bun toolchain used by the project.
+    - id: DEP-003
+      status: partial
+      evidence: package.json packageManager and engines
+      priority: high
+      next_action: Use the same pinned Bun version in CI and document the runtime setup.
+    - id: DEP-004
+      status: partial
+      evidence: package.json allowScripts
+      priority: high
+      next_action: Verify dependency lifecycle scripts and keep the allowlist minimal.
+    - id: DEP-005
+      status: compliant
+      evidence: package.json and imports under src/
+      priority: medium
+      next_action: Reassess direct dependencies as the application grows.
+    - id: DEP-006
+      status: deferred
+      evidence: docs/work/TODO.md; Bun scanner is not configured
+      priority: high
+      next_action: Select and pin a repeatable dependency vulnerability scanner before hosting or release.
+    - id: DEP-007
+      status: compliant
+      evidence: package.json packageManager and bun.lock
+      priority: medium
+      next_action: Keep Bun consistent across local and CI environments.
+    - id: CI-001
+      status: planned
+      evidence: work/TODO.md
+      priority: medium
+      next_action: Add CI quality gates after the local scripts are available.
+    - id: DATA-001
+      status: partial
+      evidence: docs/architecture/data-and-persistence.md
+      priority: high
+      next_action: Define the first versioned persisted schema and migration behavior.
+    - id: DATA-002
+      status: planned
+      evidence: docs/architecture/data-and-persistence.md
+      priority: high
+      next_action: Validate and version localStorage records before reading them.
+    - id: DATA-003
+      status: planned
+      evidence: docs/architecture/data-and-persistence.md
+      priority: high
+      next_action: Add deterministic tests for malformed, old, and missing local data.
+    - id: STYLE-001
+      status: compliant
+      evidence: src/styles/global.css, docs/architecture/proposed-system.md
+      priority: medium
+      next_action: Establish one primary styling system and document the choice.
+    - id: A11Y-001
+      status: partial
+      evidence: src/pages/index.astro, src/components/WorkspaceApp.tsx
+      priority: high
+      next_action: Review semantic structure and landmarks in the first rendered slice.
+    - id: A11Y-002
+      status: partial
+      evidence: src/styles/global.css, src/components/WorkspaceApp.tsx
+      priority: high
+      next_action: Verify keyboard flow and visible focus states before release.
+    - id: A11Y-003
+      status: partial
+      evidence: src/components/WorkspaceApp.tsx
+      priority: high
+      next_action: Associate labels, errors, and status messages with all controls.
+    - id: A11Y-005
+      status: partial
+      evidence: src/styles/global.css
+      priority: high
+      next_action: Check mobile layout, contrast, zoom, and reduced motion behavior.
+    - id: WEB-001
+      status: planned
+      evidence: work/TODO.md
+      priority: medium
+      next_action: Add a rendered-page audit for the deployed static build.
+    - id: ASTRO-001
+      status: compliant
+      evidence: astro.config.mjs, src/pages/index.astro, bun run build
+      priority: high
+      next_action: Scaffold Astro as the primary rendering model.
+    - id: ASTRO-003
+      status: compliant
+      evidence: src/components/WorkspaceApp.tsx, src/pages/index.astro
+      priority: medium
+      next_action: Keep client-side code inside the scheduling workspace island.
+    - id: ASTRO-007
+      status: compliant
+      evidence: src/pages/index.astro, docs/architecture/proposed-system.md
+      priority: high
+      next_action: Document and review each interactive island boundary.
+    - id: ASTRO-009
+      status: compliant
+      evidence: astro.config.mjs, bun run build
+      priority: medium
+      next_action: Verify deterministic static output and stable URLs.
+    - id: ASTRO-012
+      status: partial
+      evidence: astro.config.mjs, bun run build
+      priority: medium
+      next_action: Add a deliberate 404 and deployment configuration before publishing.
+
+exceptions:
+  - id: runtime-service-rules
+    scope: OPS-001..OPS-009
+    status: not-applicable-for-now
+    rationale: The intended first release is a static local-only site with no runtime service, backend, or remote data store. Build and hosting behavior still need documentation before deployment.
+  - id: account-and-api-rules
+    scope: SEC-003, SEC-007, API-001..API-008, CLERK-001..CLERK-007
+    status: not-applicable-for-now
+    rationale: The intended first release has no accounts, authentication, authorization service, or API.
+
+deferred_work:
+  - id: standards-001
+    item: Add CI quality gates and a rendered browser audit.
+    reason: The repository is being scaffolded locally before the first hosted workflow is chosen.
+    priority: medium
+  - id: standards-002
+    item: Define static hosting headers, 404 behavior, and release procedure.
+    reason: Hosting has not been selected.
+    priority: medium
+  - id: standards-003
+    item: Configure repeatable dependency vulnerability scanning.
+    reason: Bun provides the scan command but requires a separately selected scanner package.
+    priority: high
