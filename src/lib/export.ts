@@ -36,7 +36,10 @@ export function formatScheduleForSharing(
         lines.push('', 'Revisar antes de compartir como definitivo:');
         for (const item of schedule.issues) {
             const date = item.date ? ` (${formatDate(item.date)})` : '';
-            lines.push(`- ${item.message}${date}`);
+            const alias = item.participantId
+                ? ` · ${participantAlias(participants, item.participantId)}`
+                : '';
+            lines.push(`- ${item.message}${date}${alias}`);
         }
     }
 

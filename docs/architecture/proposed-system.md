@@ -13,6 +13,7 @@ The first release is intentionally small: no accounts, no server persistence, no
 - The stateful scheduling workspace is a justified client island because it must react immediately to form input, candidate generation, and local persistence.
 - The browser island receives only the local workspace state it needs. No server-only or secret data is passed to it.
 - The first release is expected to use static output so it can be hosted cheaply or opened locally after a build.
+- The mobile shell includes a manifest and home-screen metadata; offline caching is deliberately deferred.
 
 ## Domain boundaries
 

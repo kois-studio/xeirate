@@ -522,8 +522,8 @@ input::placeholder {
 
 .workspace-actions {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    align-items: stretch;
+    flex-direction: column;
     gap: 1rem;
 }
 

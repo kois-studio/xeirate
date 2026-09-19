@@ -17,6 +17,6 @@ These questions are intentionally not requirements yet. Answers should be record
 - Should the first public demo support only one active month or multiple local sessions?
 - Should repeatable person-level conditions be copied into future sessions, and how does the coordinator review or disable them?
 - Which export is most useful first: print view, image, PDF, or a structured file?
-- Is a PWA manifest/service worker worth the maintenance cost for the first release, or is an iPhone home-screen shortcut enough?
+- Is a service worker/offline cache worth the maintenance cost for a later release? The first release has a manifest and supports an iPhone home-screen shortcut.
 - Which static hosting target will be used, and what headers/404 behavior does it require?
 - What license should the open-source repository use?

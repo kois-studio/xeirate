@@ -13,6 +13,7 @@ import {
     type ConditionKind,
     type Participant,
     type PreferenceMode,
+    type ScheduleIssue,
     type Session,
     type Workspace,
 } from '../lib/domain';
@@ -61,6 +62,21 @@ function conditionDateLabel(condition: Condition): string {
 
 function lastDateOfMonth(month: string): string {
     return `${month}-${String(getDaysInMonth(month)).padStart(2, '0')}`;
+}
+
+function scheduleIssueLabel(issue: ScheduleIssue, participants: Participant[]): string {
+    const details = [
+        issue.date
+            ? new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' })
+                  .format(new Date(`${issue.date}T12:00:00`))
+                  .replace('.', '')
+            : null,
+        issue.participantId
+            ? participants.find((participant) => participant.id === issue.participantId)?.alias
+            : null,
+    ].filter(Boolean);
+
+    return details.length > 0 ? `${issue.message} (${details.join(' · ')})` : issue.message;
 }
 
 type ShareNavigator = Navigator & {
@@ -717,9 +733,15 @@ export default function WorkspaceApp(): JSX.Element {
                                     >
                                         {scheduleIssues.slice(0, 4).map((item) => (
                                             <li class={`issue-${item.severity}`} key={item.id}>
-                                                {item.message}
+                                                {scheduleIssueLabel(item, activeParticipants)}
                                             </li>
                                         ))}
+                                        {scheduleIssues.length > 4 ? (
+                                            <li class="issue-info">
+                                                Y {scheduleIssues.length - 4} alerta(s) más en el
+                                                texto compartible.
+                                            </li>
+                                        ) : null}
                                     </ul>
                                 ) : (
                                     <p class="schedule-health">No hay alertas en esta propuesta.</p>

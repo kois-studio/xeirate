@@ -41,6 +41,6 @@ The current scheduler assigns one guardia per calendar day. Restrictions are har
 - The scheduling engine is a local deterministic heuristic in `src/lib/scheduler.ts`; retrying increments the attempt seed and never uploads data.
 - `src/lib/demo-fixture.ts` contains only synthetic aliases and anonymized November-style conditions for product review. Private discovery context remains in ignored `docs/SPEC.md`.
 - No browser journey or rendered accessibility audit is configured yet.
-- PWA behavior, a downloadable file export, and hosting remain open. Print-to-PDF and Web Share/clipboard fallback are implemented.
+- A lightweight web manifest and mobile app-shell metadata are implemented; a service worker/offline cache remains open. A downloadable file export and hosting remain open. Print-to-PDF and Web Share/clipboard fallback are implemented.
 
 See [`../work/TODO.md`](../work/TODO.md) for the active work queue and [`../questions.md`](../questions.md) for domain questions.
