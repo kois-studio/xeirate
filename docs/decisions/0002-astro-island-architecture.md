@@ -1,6 +1,6 @@
 # ADR 0002: Use Astro with a bounded interactive scheduling island
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-09-19
 - **Supersedes:** None
 - **Superseded by:** None
@@ -11,7 +11,7 @@ The product has a mostly static shell but also needs immediate updates as a coor
 
 ## Decision
 
-Use Astro as the primary renderer and build system. Keep the stateful scheduling workflow inside a deliberately bounded client island. The island may use Preact if the initial scaffold benefits from its small runtime, but the island boundary and domain modules must remain independent of the view library.
+Use Astro as the primary renderer and build system. Keep the stateful scheduling workflow inside a deliberately bounded Preact client island. The island boundary and domain modules remain independent of the view library.
 
 ## Consequences
 
@@ -19,7 +19,7 @@ Use Astro as the primary renderer and build system. Keep the stateful scheduling
 - Interactive behavior is explicit and reviewable at the island boundary.
 - Domain and persistence code can be tested without a browser.
 - The project must resist turning the entire site into an unbounded client application.
-- Preact remains a proposal until the scaffold and first slice demonstrate that it is useful.
+- Preact is intentionally limited to the interactive workspace; domain, scheduling, export, and persistence modules remain framework-independent.
 
 ## Alternatives considered
 

@@ -16,13 +16,13 @@ The first release is intentionally small: no accounts, no server persistence, no
 
 ## Domain boundaries
 
-The implementation should keep these responsibilities separate:
+The implementation keeps these responsibilities separate:
 
 - `domain`: participants, month sessions, conditions, candidate schedule models, conflict/fairness concepts, and pure validation.
 - `persistence`: versioned localStorage envelope, migrations, safe parsing, and browser capability handling.
-- `scheduling`: deterministic candidate generation and scoring once the domain rules are clarified.
+    - `scheduling`: deterministic candidate generation and scoring within the provisional demo rule set.
 - `ui`: Astro pages and the interactive workspace; it translates coordinator actions into domain commands and displays outcomes.
-- `export`: printable/image/PDF representations, added only after the schedule model is stable.
+- `export`: share text plus print-to-PDF through the browser; a downloadable file/image format remains open.
 
 The initial slice may keep these boundaries in a small number of files, but it must avoid coupling solver rules directly to DOM event handlers.
 
@@ -31,12 +31,12 @@ The initial slice may keep these boundaries in a small number of files, but it m
 1. The coordinator introduces department participants using aliases.
 2. The coordinator starts a session for a specific month.
 3. The coordinator adds one structured condition at a time, choosing whether it is a hard restriction, a soft preference, or a request that needs clarification.
-4. The candidate schedule updates after accepted conditions.
-5. The coordinator retries generation to explore another valid candidate.
-6. The coordinator reviews conflicts and fairness explanations.
-7. The coordinator exports a shareable result.
+4. The coordinator generates a candidate schedule after accepted conditions.
+5. The coordinator retries generation to explore another candidate with the same inputs.
+6. The coordinator reviews conflicts, clarification warnings, and fairness summary.
+7. The coordinator shares text or opens the browser print flow to save a PDF.
 
-Only the first two steps and the workspace boundary belong to the initial implementation slice. The remainder is proposed behavior until the open questions are resolved.
+The current implementation covers this workflow with one guardia per calendar day. The rule set remains provisional until the open domain questions are resolved; the app intentionally does not infer areas, doubletes, or institutional policies.
 
 ## Styling and interaction
 

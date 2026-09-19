@@ -16,9 +16,9 @@ type StorageEnvelope = {
 };
 ```
 
-The current workspace contains participants, month sessions, and provisional conditions. A condition has a person, session, kind (`restriction`, `preference`, or `clarification`), optional start/end dates, a coordinator note, a reusable flag, and a creation timestamp. These kinds support translation and review; they do not yet drive a scheduling solver.
+The current workspace contains participants, month sessions, provisional conditions, and the latest generated schedule. A condition has a person, session, kind (`restriction`, `preference`, or `clarification`), optional `avoid`/`prefer` mode, optional start/end dates, a coordinator note, a reusable flag, and a creation timestamp. Restrictions drive hard availability; preferences influence the heuristic; clarifications become review warnings. These semantics are intentionally provisional until the department rules are validated.
 
-The current envelope is `schemaVersion: 2` stored under `xeirate.workspace`. Runtime validation is required when reading localStorage. Invalid or unsupported data must be rejected safely, with a recoverable reset path and no silent corruption.
+The current envelope is `schemaVersion: 3` stored under `xeirate.workspace`. Runtime validation is required when reading localStorage. Invalid or unsupported data must be rejected safely, with a recoverable reset path and no silent corruption.
 
 ## Lifecycle
 
@@ -27,7 +27,7 @@ The current envelope is `schemaVersion: 2` stored under `xeirate.workspace`. Run
 - Update: after accepted user actions, using a deterministic serialization path.
 - Delete/reset: through an explicit user action that clearly states the local scope.
 - Export: creates a user-controlled file or rendered artifact; it does not upload data.
-- Migration: the implemented v1-to-v2 migration adds an empty condition collection without losing existing participants or sessions. Future schema versions need named migration functions and tests before release.
+- Migration: the implemented v1-to-v3 migration adds conditions and empty schedules; the v2-to-v3 migration adds empty schedules and defaults legacy preferences to `avoid`, without losing existing participants or sessions. Future schema versions need named migration functions and tests before release.
 
 ## Validation and safety
 

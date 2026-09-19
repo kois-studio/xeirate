@@ -2,20 +2,20 @@
 
 ### [XEIRATE-003] [P1] [domain] Define condition types and conflict semantics
 
-- **Status:** Proposed
+- **Status:** In progress / provisional
 - **Origin:** discovery / open domain questions
 - **Goal:** Give the coordinator a clear way to translate informal notes into hard restrictions, soft preferences, and clarification-needed items.
 - **Why now:** The solver cannot be trustworthy until condition semantics and guardia rules are explicit.
 - **Scope:** condition taxonomy, dates/ranges, areas, travel/courses, fixed reusable conditions, conflict explanation, concession/fairness record.
 - **Non-goals:** importing real workplace requests into tests or making clinical staffing policy decisions.
-- **Acceptance criteria:** To be defined after domain conversation and synthetic fixture review.
-- **Current implementation note:** A provisional intake schema and UI exist for translating notes; they must not be treated as final solver semantics.
+- **Acceptance criteria:** A coordinator can enter bounded restrictions/preferences/clarifications, generate and retry a monthly proposal, see unresolved or impossible cases, and review a synthetic November-style fixture without real personal data.
+- **Current implementation note:** A provisional intake schema, deterministic heuristic, fairness summary, conflict warnings, reusable undated conditions, anonymized fixture, and text/print export exist. Areas, doubletes, concession history, and department-specific policies must not be inferred from this demo.
 - **Verification:** domain examples, decision record, deterministic unit tests.
 - **Affected areas:** domain, scheduling, persistence, docs.
 - **Dependencies:** The initial implementation slice and answers to `docs/questions.md`.
 - **Risks:** Misrepresenting internal terminology or safety constraints.
 - **Blocker or question:** Needs domain clarification.
-- **Next action:** Review the open questions with a clinician/coordinator and record only confirmed semantics.
+- **Next action:** Review the open questions and the anonymized fixture with a clinician/coordinator; record only confirmed semantics before expanding the solver.
 - **Owner:** product/domain owner
 - **Last updated:** 2026-09-19
 

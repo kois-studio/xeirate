@@ -54,7 +54,7 @@ compliance:
       next_action: Update evidence and status after each implementation slice.
     - id: TEST-003
       status: compliant
-      evidence: src/lib/persistence.test.ts, bun test
+      evidence: src/lib/persistence.test.ts, src/lib/scheduler.test.ts, src/lib/export.test.ts, bun test
       priority: high
       next_action: Add deterministic domain and persistence-boundary tests with the first implementation slice.
     - id: TEST-006
@@ -64,7 +64,7 @@ compliance:
       next_action: Make the test command runnable locally and in CI.
     - id: TEST-008
       status: compliant
-      evidence: src/lib/persistence.test.ts, bun test
+      evidence: src/lib/persistence.test.ts, src/lib/scheduler.test.ts, src/lib/export.test.ts, bun test
       priority: high
       next_action: Establish an automated quality baseline before calling the project implementation-ready.
     - id: TS-001
@@ -154,7 +154,7 @@ compliance:
       next_action: Add CI quality gates after the local scripts are available.
     - id: DATA-001
       status: compliant
-      evidence: docs/architecture/data-and-persistence.md, src/lib/domain.ts, src/lib/persistence.ts
+      evidence: docs/architecture/data-and-persistence.md, src/lib/domain.ts, src/lib/persistence.ts, src/lib/scheduler.ts
       priority: high
       next_action: Version future condition and schedule changes with explicit migrations.
     - id: DATA-002
@@ -164,7 +164,7 @@ compliance:
       next_action: Extend boundary validation as import/export is added.
     - id: DATA-003
       status: compliant
-      evidence: src/lib/persistence.test.ts
+      evidence: src/lib/persistence.test.ts, src/lib/domain.ts
       priority: high
       next_action: Add migration tests for each future schema version.
     - id: STYLE-001
