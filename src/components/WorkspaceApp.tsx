@@ -17,6 +17,9 @@ import {
     type Workspace,
 } from '../lib/domain';
 import { clearWorkspace, loadWorkspace, saveWorkspace } from '../lib/persistence';
+import { createDemoWorkspace } from '../lib/demo-fixture';
+import { formatScheduleForSharing } from '../lib/export';
+import { generateSchedule } from '../lib/scheduler';
 
 function currentMonth(): string {
     const now = new Date();
@@ -59,6 +62,10 @@ function conditionDateLabel(condition: Condition): string {
 function lastDateOfMonth(month: string): string {
     return `${month}-${String(getDaysInMonth(month)).padStart(2, '0')}`;
 }
+
+type ShareNavigator = Navigator & {
+    share?: (data: { title: string; text: string }) => Promise<void>;
+};
 
 export default function WorkspaceApp(): JSX.Element {
     const [workspace, setWorkspace] = useState<Workspace>(emptyWorkspace);
@@ -131,6 +138,16 @@ export default function WorkspaceApp(): JSX.Element {
                 : [],
         [activeSession, workspace.conditions],
     );
+
+    const activeSchedule = activeSession?.schedule ?? null;
+    const scheduleAssignments = useMemo(
+        () =>
+            new Map(activeSchedule?.assignments.map((assignment) => [assignment.date, assignment])),
+        [activeSchedule],
+    );
+    const scheduleIssues = activeSchedule?.issues ?? [];
+    const scheduleErrors = scheduleIssues.filter((item) => item.severity === 'error');
+    const scheduleWarnings = scheduleIssues.filter((item) => item.severity === 'warning');
 
     useEffect(() => {
         const firstParticipant = activeParticipants[0];
@@ -209,12 +226,31 @@ export default function WorkspaceApp(): JSX.Element {
             createdAt: new Date().toISOString(),
             schedule: null,
         });
+        const reusableConditions = workspace.conditions
+            .filter(
+                (condition) =>
+                    condition.reusable &&
+                    !condition.startDate &&
+                    !condition.endDate &&
+                    session.participantIds.includes(condition.participantId),
+            )
+            .map((condition) => ({
+                ...condition,
+                id: createIdentifier('condition'),
+                sessionId: session.id,
+                createdAt: new Date().toISOString(),
+            }));
         setWorkspace((current) => ({
             ...current,
             sessions: [...current.sessions, session],
             activeSessionId: session.id,
+            conditions: [...current.conditions, ...reusableConditions],
         }));
-        setNotice(`Sesión de ${monthLabel(month)} preparada.`);
+        setNotice(
+            reusableConditions.length > 0
+                ? `Sesión de ${monthLabel(month)} preparada con ${reusableConditions.length} condición(es) fija(s).`
+                : `Sesión de ${monthLabel(month)} preparada.`,
+        );
     }
 
     function addCondition(event: TargetedEvent<HTMLFormElement, SubmitEvent>): void {
@@ -248,12 +284,15 @@ export default function WorkspaceApp(): JSX.Element {
             startDate: conditionStartDate || null,
             endDate: conditionEndDate || null,
             note: normalizedNote,
-            reusable: conditionReusable,
+            reusable: conditionReusable && !conditionStartDate && !conditionEndDate,
             createdAt: new Date().toISOString(),
         });
         setWorkspace((current) => ({
             ...current,
             conditions: [...current.conditions, condition],
+            sessions: current.sessions.map((session) =>
+                session.id === activeSession.id ? { ...session, schedule: null } : session,
+            ),
         }));
         setConditionStartDate('');
         setConditionEndDate('');
@@ -266,8 +305,75 @@ export default function WorkspaceApp(): JSX.Element {
         setWorkspace((current) => ({
             ...current,
             conditions: current.conditions.filter((condition) => condition.id !== conditionId),
+            sessions: current.sessions.map((session) =>
+                session.id === activeSession?.id ? { ...session, schedule: null } : session,
+            ),
         }));
         setNotice('Condición eliminada de la sesión.');
+    }
+
+    function generateCurrentSchedule(): void {
+        if (!activeSession || activeParticipants.length === 0) {
+            setNotice('Prepara una sesión con personas antes de generar una propuesta.');
+            return;
+        }
+
+        const nextAttempt = (activeSession.schedule?.attempt ?? 0) + 1;
+        const schedule = generateSchedule({
+            session: activeSession,
+            participants: activeParticipants,
+            conditions: activeConditions,
+            attempt: nextAttempt,
+        });
+        setWorkspace((current) => ({
+            ...current,
+            sessions: current.sessions.map((session) =>
+                session.id === activeSession.id ? { ...session, schedule } : session,
+            ),
+        }));
+        setNotice(
+            schedule.issues.some((item) => item.severity === 'error')
+                ? 'Propuesta generada con días pendientes de resolver.'
+                : `Propuesta ${nextAttempt} generada. Revisa las alertas antes de compartirla.`,
+        );
+    }
+
+    function loadDemo(): void {
+        const demo = createDemoWorkspace();
+        setWorkspace(demo);
+        setMonth('2026-11');
+        setNotice('Ejemplo anonimizado cargado. Revisa las condiciones y genera una propuesta.');
+    }
+
+    function printSchedule(): void {
+        window.print();
+    }
+
+    async function shareSchedule(): Promise<void> {
+        if (!activeSession || !activeSchedule) {
+            return;
+        }
+
+        const text = formatScheduleForSharing(activeSession, activeParticipants, activeSchedule);
+        const shareNavigator = navigator as ShareNavigator;
+        try {
+            if (shareNavigator.share) {
+                await shareNavigator.share({ title: 'Propuesta de guardias', text });
+                setNotice('Propuesta compartida.');
+                return;
+            }
+            if (navigator.clipboard) {
+                await navigator.clipboard.writeText(text);
+                setNotice('Propuesta copiada. Ya puedes pegarla en WhatsApp.');
+                return;
+            }
+            setNotice('Este navegador no permite compartir automáticamente la propuesta.');
+        } catch (error) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                return;
+            }
+            setNotice('No hemos podido compartir la propuesta desde este navegador.');
+        }
     }
 
     function resetWorkspace(): void {
@@ -368,8 +474,8 @@ export default function WorkspaceApp(): JSX.Element {
                     <div class="section-kicker">Tercer paso</div>
                     <h2 id="condition-title">Traduce una petición</h2>
                     <p class="section-intro">
-                        Convierte lo que te han pedido en una nota estructurada. Xeirate todavía no
-                        decide el calendario: primero te ayuda a no perder ningún detalle.
+                        Convierte lo que te han pedido en una condición estructurada. Después podrás
+                        generar propuestas y revisar qué peticiones necesitan una decisión humana.
                     </p>
 
                     <form class="condition-form" onSubmit={addCondition}>
@@ -473,7 +579,12 @@ export default function WorkspaceApp(): JSX.Element {
                                     id="condition-reusable"
                                     name="condition-reusable"
                                     type="checkbox"
-                                    checked={conditionReusable}
+                                    checked={
+                                        !conditionStartDate &&
+                                        !conditionEndDate &&
+                                        conditionReusable
+                                    }
+                                    disabled={Boolean(conditionStartDate || conditionEndDate)}
                                     onChange={(event) =>
                                         setConditionReusable(event.currentTarget.checked)
                                     }
@@ -481,7 +592,9 @@ export default function WorkspaceApp(): JSX.Element {
                                 <span>
                                     <strong>Recordar como condición fija</strong>
                                     <small>
-                                        Se guardará como reutilizable para una futura sesión.
+                                        {conditionStartDate || conditionEndDate
+                                            ? 'Las condiciones con fechas solo afectan a este mes.'
+                                            : 'Se guardará como reutilizable para una futura sesión.'}
                                     </small>
                                 </span>
                             </label>
@@ -520,6 +633,13 @@ export default function WorkspaceApp(): JSX.Element {
                                         <p class="condition-copy">{condition.note}</p>
                                         <div class="condition-meta">
                                             <span>{conditionDateLabel(condition)}</span>
+                                            {condition.kind === 'preference' ? (
+                                                <span>
+                                                    {condition.preferenceMode === 'prefer'
+                                                        ? 'Intentar asignar'
+                                                        : 'Intentar evitar'}
+                                                </span>
+                                            ) : null}
                                             {condition.reusable ? (
                                                 <span>⌁ Condición fija</span>
                                             ) : null}
@@ -559,25 +679,83 @@ export default function WorkspaceApp(): JSX.Element {
                                 : 'Tu calendario aparecerá aquí'}
                         </h2>
                     </div>
-                    <button class="button button-quiet" type="button" disabled={!activeSession}>
-                        <span aria-hidden="true">↻</span> Reintentar
+                    <button
+                        class="button button-quiet"
+                        type="button"
+                        disabled={!activeSession || activeParticipants.length === 0}
+                        onClick={generateCurrentSchedule}
+                    >
+                        <span aria-hidden="true">{activeSchedule ? '↻' : '✦'}</span>{' '}
+                        {activeSchedule ? 'Reintentar' : 'Generar propuesta'}
                     </button>
                 </div>
 
                 {activeSession ? (
                     <>
-                        <div class="workspace-note">
-                            <span class="note-icon" aria-hidden="true">
-                                ☼
-                            </span>
-                            <div>
-                                <strong>La generación llegará después.</strong>
-                                <p>
-                                    Ya tienes el mes y las personas. El siguiente paso será añadir
-                                    condiciones y generar una propuesta explicable.
-                                </p>
+                        {activeSchedule ? (
+                            <>
+                                <div class="schedule-summary">
+                                    <div class="schedule-summary-item">
+                                        <strong>{activeSchedule.assignments.length}</strong>
+                                        <span>guardias asignadas</span>
+                                    </div>
+                                    <div class="schedule-summary-item">
+                                        <strong>{activeSchedule.fairness.maxDifference}</strong>
+                                        <span>de diferencia máxima</span>
+                                    </div>
+                                    <div class="schedule-summary-item">
+                                        <strong>
+                                            {scheduleErrors.length + scheduleWarnings.length}
+                                        </strong>
+                                        <span>alertas para revisar</span>
+                                    </div>
+                                </div>
+                                {scheduleIssues.length > 0 ? (
+                                    <ul
+                                        class="schedule-issues"
+                                        aria-label="Alertas de la propuesta"
+                                    >
+                                        {scheduleIssues.slice(0, 4).map((item) => (
+                                            <li class={`issue-${item.severity}`} key={item.id}>
+                                                {item.message}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p class="schedule-health">No hay alertas en esta propuesta.</p>
+                                )}
+                                <div class="schedule-actions">
+                                    <button
+                                        class="button button-secondary"
+                                        type="button"
+                                        onClick={shareSchedule}
+                                    >
+                                        Compartir
+                                    </button>
+                                    <button
+                                        class="button button-quiet"
+                                        type="button"
+                                        onClick={printSchedule}
+                                    >
+                                        Imprimir / PDF
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <div class="workspace-note">
+                                <span class="note-icon" aria-hidden="true">
+                                    ☼
+                                </span>
+                                <div>
+                                    <strong>Lista para generar una propuesta.</strong>
+                                    <p>
+                                        Xeirate tratará las restricciones como límites, las
+                                        preferencias como señales y dejará visibles las peticiones
+                                        por aclarar.
+                                    </p>
+                                </div>
                             </div>
-                        </div>
+                        )}
                         <ul
                             class="calendar-grid"
                             aria-label={`Días de ${monthLabel(activeSession.month)}`}
@@ -585,9 +763,31 @@ export default function WorkspaceApp(): JSX.Element {
                             {Array.from(
                                 { length: getDaysInMonth(activeSession.month) },
                                 (_, index) => (
-                                    <li key={index + 1}>
+                                    <li
+                                        class={
+                                            scheduleAssignments.has(
+                                                `${activeSession.month}-${String(index + 1).padStart(2, '0')}`,
+                                            )
+                                                ? 'assigned-day'
+                                                : 'unassigned-day'
+                                        }
+                                        key={index + 1}
+                                    >
                                         <span class="day-number">{index + 1}</span>
-                                        <span class="day-state">Sin asignar</span>
+                                        <span class="day-state">
+                                            {(() => {
+                                                const assignment = scheduleAssignments.get(
+                                                    `${activeSession.month}-${String(index + 1).padStart(2, '0')}`,
+                                                );
+                                                return assignment
+                                                    ? (activeParticipants.find(
+                                                          (participant) =>
+                                                              participant.id ===
+                                                              assignment.participantId,
+                                                      )?.alias ?? 'Sin nombre')
+                                                    : 'Sin asignar';
+                                            })()}
+                                        </span>
                                     </li>
                                 ),
                             )}
@@ -600,6 +800,9 @@ export default function WorkspaceApp(): JSX.Element {
                         </span>
                         <strong>Primero prepara una sesión</strong>
                         <span>Cuando tengas personas y un mes, este será tu punto de partida.</span>
+                        <button class="button button-quiet" type="button" onClick={loadDemo}>
+                            Cargar ejemplo anonimizado
+                        </button>
                     </div>
                 )}
             </section>
