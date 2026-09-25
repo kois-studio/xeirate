@@ -64,6 +64,13 @@ function weekdayLabel(value: number | null): string | null {
     return weekdays.find((weekday) => weekday.value === value)?.label ?? null;
 }
 
+function calendarWeekdayLabel(date: string): string {
+    return new Intl.DateTimeFormat('es-ES', { weekday: 'short' })
+        .format(new Date(`${date}T12:00:00`))
+        .replace('.', '')
+        .slice(0, 3);
+}
+
 function conditionDateLabel(condition: Condition): string {
     const recurringWeekday = weekdayLabel(condition.weekday);
     if (recurringWeekday) {
@@ -539,7 +546,7 @@ export default function WorkspaceApp(): JSX.Element {
                 </button>
                 <div class="condition-row-copy">
                     <strong>{conditionSummary(condition)}</strong>
-                    <span>{condition.note}</span>
+                    <span class="condition-note">{condition.note}</span>
                     {condition.sessionId === null ? (
                         <small>Condición fija de la persona</small>
                     ) : null}
@@ -565,34 +572,36 @@ export default function WorkspaceApp(): JSX.Element {
     function renderPeopleView(): JSX.Element {
         return (
             <section class="app-view" aria-labelledby="people-title">
-                <div class="view-heading">
-                    <div>
-                        <p class="section-kicker">Equipo permanente</p>
-                        <h2 id="people-title">Personas</h2>
-                        <p class="section-intro">
-                            Guarda aquí a las personas que participan en las guardias. Las
-                            condiciones fijas se aplicarán automáticamente a sus futuras sesiones.
-                        </p>
+                <div class="people-toolbar">
+                    <div class="view-heading">
+                        <div>
+                            <p class="section-kicker">Equipo permanente</p>
+                            <h2 id="people-title">Personas</h2>
+                            <p class="section-intro">
+                                Guarda el equipo una vez. Las condiciones fijas reaparecerán al
+                                preparar cada mes.
+                            </p>
+                        </div>
                     </div>
-                </div>
 
-                <form class="add-person-form" onSubmit={addParticipant}>
-                    <label for="participant-alias">Añadir persona</label>
-                    <div class="form-row">
-                        <input
-                            id="participant-alias"
-                            name="participant-alias"
-                            value={alias}
-                            placeholder="Ej. Laura"
-                            maxLength={40}
-                            autoComplete="off"
-                            onInput={(event) => setAlias(event.currentTarget.value)}
-                        />
-                        <button class="button button-primary" type="submit">
-                            <span aria-hidden="true">+</span> Añadir
-                        </button>
-                    </div>
-                </form>
+                    <form class="add-person-form" onSubmit={addParticipant}>
+                        <label for="participant-alias">Añadir al equipo</label>
+                        <div class="form-row">
+                            <input
+                                id="participant-alias"
+                                name="participant-alias"
+                                value={alias}
+                                placeholder="Ej. Laura"
+                                maxLength={40}
+                                autoComplete="off"
+                                onInput={(event) => setAlias(event.currentTarget.value)}
+                            />
+                            <button class="button button-primary" type="submit">
+                                <span aria-hidden="true">+</span> Añadir
+                            </button>
+                        </div>
+                    </form>
+                </div>
 
                 {workspace.participants.length > 0 ? (
                     <div class="person-cards">
@@ -676,10 +685,13 @@ export default function WorkspaceApp(): JSX.Element {
         }
 
         return (
-            <section class="workspace-card calendar-card" aria-labelledby="calendar-title">
+            <section
+                class="workspace-card calendar-card schedule-card"
+                aria-labelledby="calendar-title"
+            >
                 <div class="calendar-heading">
                     <div>
-                        <p class="section-kicker">Propuesta de guardias</p>
+                        <p class="section-kicker">Tablero del mes</p>
                         <h2 id="calendar-title">Guardias de {monthLabel(activeSession.month)}</h2>
                     </div>
                     <button
@@ -732,7 +744,7 @@ export default function WorkspaceApp(): JSX.Element {
                                 type="button"
                                 onClick={shareSchedule}
                             >
-                                Compartir
+                                Compartir propuesta
                             </button>
                             <button
                                 class="button button-quiet"
@@ -763,6 +775,7 @@ export default function WorkspaceApp(): JSX.Element {
                         const assignment = scheduleAssignments.get(date);
                         return (
                             <li class={assignment ? 'assigned-day' : 'unassigned-day'} key={date}>
+                                <span class="day-week">{calendarWeekdayLabel(date)}</span>
                                 <span class="day-number">{index + 1}</span>
                                 <span class="day-state">
                                     {assignment
@@ -947,9 +960,12 @@ export default function WorkspaceApp(): JSX.Element {
     return (
         <div class="app-shell">
             <header class="app-header">
-                <div>
+                <div class="app-header-copy">
                     <p class="section-kicker">Espacio local</p>
-                    <h1>Organiza tus guardias con calma.</h1>
+                    <h1>El mes, más claro.</h1>
+                    <p class="app-header-description">
+                        Traduce peticiones, explora una propuesta y decide con tu equipo.
+                    </p>
                 </div>
                 <span class="local-badge">
                     <span aria-hidden="true">●</span> Solo en este navegador
@@ -960,9 +976,12 @@ export default function WorkspaceApp(): JSX.Element {
                 <button
                     class={view === 'people' ? 'app-nav-item active' : 'app-nav-item'}
                     type="button"
+                    aria-current={view === 'people' ? 'page' : undefined}
                     onClick={() => setView('people')}
                 >
-                    <span class="app-nav-number">01</span>
+                    <span class="app-nav-mark" aria-hidden="true">
+                        ●
+                    </span>
                     <span>
                         <strong>Personas</strong>
                         <small>Tu equipo y condiciones fijas</small>
@@ -971,9 +990,12 @@ export default function WorkspaceApp(): JSX.Element {
                 <button
                     class={view === 'sessions' ? 'app-nav-item active' : 'app-nav-item'}
                     type="button"
+                    aria-current={view === 'sessions' ? 'page' : undefined}
                     onClick={() => setView('sessions')}
                 >
-                    <span class="app-nav-number">02</span>
+                    <span class="app-nav-mark" aria-hidden="true">
+                        ◒
+                    </span>
                     <span>
                         <strong>Sesiones</strong>
                         <small>Meses, peticiones y propuestas</small>
