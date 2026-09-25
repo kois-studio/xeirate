@@ -16,7 +16,9 @@ This document describes repository facts, not the complete product intention. It
 
 The project uses Astro 7 with static output, Preact 10 for the interactive island, TypeScript 6 with Astro's `strictest` preset, Zod 4 for runtime schemas, Bun 1.3.4, and Biome 2.5.14 configured for four-space indentation. The site builds to static output. There is currently no backend, database, account system, API, analytics, or remote logging.
 
-The package scripts currently support development, formatting, linting, Astro type-checking, Bun tests, static build, and Bun dependency scanning. A hosted deployment target and CI workflow are not yet selected.
+The package scripts currently support development, formatting, linting, Astro type-checking, Bun tests, static build, and Bun dependency scanning. The selected hosting target is Vercel; a CI workflow is not yet configured.
+
+The public repository is [`kois-studio/xeirate`](https://github.com/kois-studio/xeirate). The current production deployment is [xeirate.kois.app](https://xeirate.kois.app), a verified subdomain of `kois.app` attached to the Vercel project `xeirate` under the `dawichis-projects` scope. The `.vercel.app` alias remains available. The deployment was created through the Vercel CLI on 2026-09-25. The Vercel GitHub integration could not be connected to the `kois-studio` repository, so pushes to `main` do not currently deploy automatically; future agents should batch related changes and use an explicit production deployment when a slice is ready.
 
 ## User workflow currently in scope
 
@@ -42,6 +44,6 @@ The current scheduler assigns one guardia per calendar day. Restrictions are har
 - The scheduling engine is a local deterministic heuristic in `src/lib/scheduler.ts`; retrying increments the attempt seed and never uploads data.
 - `src/lib/demo-fixture.ts` contains only synthetic aliases and anonymized November-style conditions for product review. Private discovery context remains in ignored `docs/SPEC.md`.
 - No browser journey or rendered accessibility audit is configured yet.
-- A lightweight web manifest and mobile app-shell metadata are implemented; a service worker/offline cache remains open. A downloadable file export and hosting remain open. Print-to-PDF and Web Share/clipboard fallback are implemented.
+- A lightweight web manifest and mobile app-shell metadata are implemented; a service worker/offline cache remains open. A downloadable file export and CI/rendered browser audit remain open. Print-to-PDF and Web Share/clipboard fallback are implemented.
 
 See [`../work/TODO.md`](../work/TODO.md) for the active work queue and [`../questions.md`](../questions.md) for domain questions.

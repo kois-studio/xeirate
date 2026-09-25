@@ -34,6 +34,14 @@ When a document and the implementation disagree, mark the documentation stale an
 - Add or update an ADR for durable architecture, privacy, persistence, export, or deployment decisions.
 - Keep unfinished work in [`work/TODO.md`](work/TODO.md), including discoveries that are intentionally deferred.
 
+## Deployment
+
+- The public repository is [`kois-studio/xeirate`](https://github.com/kois-studio/xeirate).
+- The production site is [xeirate.kois.app](https://xeirate.kois.app), served by the Vercel project `xeirate` under the `dawichis-projects` scope.
+- As of 2026-09-25, the deployment was created and verified manually through the Vercel CLI. The GitHub-to-Vercel integration is not connected, so pushing to `main` does **not** currently trigger a deployment.
+- If automatic GitHub deployments are connected later, batch related implementation changes and push at the end of a reviewable slice. Avoid pushing small intermediate changes solely to trigger production builds.
+- Keep the Vercel project linked locally only through ignored `.vercel` metadata; do not commit deployment credentials or private discovery data.
+
 ## Verification commands
 
 These commands become the supported project checks once the Astro scaffold is installed:

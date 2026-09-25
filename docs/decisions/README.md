@@ -6,3 +6,4 @@ Durable architecture and policy decisions live here. Accepted ADRs are not silen
 - [`0002-astro-island-architecture.md`](0002-astro-island-architecture.md) — accepted Astro and bounded Preact island architecture.
 - [`0003-mobile-app-shell.md`](0003-mobile-app-shell.md) — accepted lightweight phone home-screen app shell without a service worker.
 - [`0004-landing-and-workspace-boundary.md`](0004-landing-and-workspace-boundary.md) — accepted public landing and `/app` workspace boundary.
+- [`0005-vercel-static-deployment.md`](0005-vercel-static-deployment.md) — accepted Vercel hosting and `xeirate.kois.app` production URL.
