@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 
-import { getDaysInMonth, type Session } from '../../../lib/domain';
+import { getDaysInMonth, type ScheduleAssignment, type Session } from '../../../lib/domain';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { WorkspaceService } from '../../services/workspace.service';
 import { AppButtonComponent } from '../button/button.component';
@@ -29,6 +29,16 @@ export class ScheduleViewComponent {
         return (
             this.store.activeParticipants().find((participant) => participant.id === participantId)
                 ?.alias ?? 'Sin nombre'
+        );
+    }
+
+    assignmentsForDate(date: string): ScheduleAssignment[] {
+        return this.store.scheduleAssignments().get(date) ?? [];
+    }
+
+    assignmentsForColumn(date: string, columnId: string): ScheduleAssignment[] {
+        return this.assignmentsForDate(date).filter(
+            (assignment) => assignment.columnId === columnId,
         );
     }
 }

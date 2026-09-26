@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 
-import { emptyWorkspace } from './domain';
+import { createDefaultScheduleConfiguration, emptyWorkspace } from './domain';
 import {
     clearWorkspace,
     LEGACY_STORAGE_KEY,
@@ -50,6 +50,10 @@ describe('workspace persistence', () => {
                     month: '2026-11',
                     participantIds: ['person-1'],
                     createdAt: '2026-09-19T10:00:00.000Z',
+                    scheduleConfig: createDefaultScheduleConfiguration(),
+                    participantColumnEligibility: [
+                        { participantId: 'person-1', columnIds: ['general'] },
+                    ],
                     schedule: null,
                 },
             ],
@@ -228,6 +232,48 @@ describe('workspace persistence', () => {
 
         expect(result.status).toBe('migrated');
         expect(result.workspace.conditions[0]?.weekdays).toEqual([2]);
+    });
+
+    test('migrates schema five sessions into the generic coverage model', () => {
+        const schemaFive = createMemoryStorage(
+            JSON.stringify({
+                schemaVersion: 5,
+                updatedAt: '2026-09-19T10:00:00.000Z',
+                workspace: {
+                    participants: [{ id: 'person-1', alias: 'Lúa' }],
+                    sessions: [
+                        {
+                            id: 'session-1',
+                            month: '2026-11',
+                            participantIds: ['person-1'],
+                            createdAt: '2026-09-19T10:00:00.000Z',
+                            schedule: {
+                                attempt: 1,
+                                generatedAt: '2026-09-19T10:00:00.000Z',
+                                assignments: [{ date: '2026-11-01', participantId: 'person-1' }],
+                                score: 0,
+                                fairness: {
+                                    minAssignments: 1,
+                                    maxAssignments: 1,
+                                    maxDifference: 0,
+                                    preferenceBreaks: 0,
+                                },
+                                issues: [],
+                            },
+                        },
+                    ],
+                    activeSessionId: 'session-1',
+                    conditions: [],
+                },
+            }),
+        );
+
+        const result = loadWorkspace(schemaFive);
+
+        expect(result.status).toBe('migrated');
+        expect(result.workspace.sessions[0]?.scheduleConfig.mode).toBe('single');
+        expect(result.workspace.sessions[0]?.scheduleConfig.columns[0]?.id).toBe('general');
+        expect(result.workspace.sessions[0]?.schedule?.assignments[0]?.columnId).toBe('general');
     });
 
     test('clears the local workspace through the storage boundary', () => {

@@ -5,6 +5,8 @@ import {
     type Condition,
     type ConditionKind,
     createCondition,
+    createDefaultScheduleColumn,
+    createDefaultScheduleConfiguration,
     createIdentifier,
     createSession,
     emptyWorkspace,
@@ -12,10 +14,13 @@ import {
     getDaysInMonth,
     isValidMonth,
     type Participant,
+    type ScheduleColumn,
+    type ScheduleConfiguration,
     type PreferenceMode,
     type ScheduleIssue,
     type Session,
     type Workspace,
+    scheduleConfigurationSchema,
 } from '../../lib/domain';
 import { formatScheduleForSharing } from '../../lib/export';
 import {
@@ -25,7 +30,7 @@ import {
     saveWorkspace,
 } from '../../lib/persistence';
 import { generateSchedule } from '../../lib/scheduler';
-import type { TranslationKey } from '../i18n/translations';
+import type { TranslationKey, TranslationParams } from '../i18n/translations';
 import { LanguageService } from './language.service';
 
 export type AppView = 'people' | 'sessions';
@@ -121,12 +126,12 @@ export class WorkspaceService {
     readonly activeSchedule = computed(() => this.activeSession()?.schedule ?? null);
     readonly scheduleAssignments = computed(
         () =>
-            new Map(
-                this.activeSchedule()?.assignments.map((assignment) => [
-                    assignment.date,
-                    assignment,
-                ]),
-            ),
+            this.activeSchedule()?.assignments.reduce((byDate, assignment) => {
+                const assignments = byDate.get(assignment.date) ?? [];
+                assignments.push(assignment);
+                byDate.set(assignment.date, assignments);
+                return byDate;
+            }, new Map<string, NonNullable<Session['schedule']>['assignments']>()) ?? new Map(),
     );
     readonly scheduleIssues = computed(() => this.activeSchedule()?.issues ?? []);
     readonly scheduleErrors = computed(() =>
@@ -157,6 +162,10 @@ export class WorkspaceService {
                 this.notice.set(this.languageService.translate('notice.unavailableStorage'));
             }
         });
+    }
+
+    translate(key: TranslationKey, params: TranslationParams = {}): string {
+        return this.languageService.translate(key, params);
     }
 
     setView(view: AppView): void {
@@ -213,6 +222,9 @@ export class WorkspaceService {
             sessions: current.sessions.map((session) => ({
                 ...session,
                 participantIds: session.participantIds.filter((id) => id !== participantId),
+                participantColumnEligibility: session.participantColumnEligibility.filter(
+                    (entry) => entry.participantId !== participantId,
+                ),
                 schedule: session.participantIds.includes(participantId) ? null : session.schedule,
             })),
             conditions: current.conditions.filter(
@@ -239,6 +251,11 @@ export class WorkspaceService {
             month,
             participantIds: current.participants.map((participant) => participant.id),
             createdAt: new Date().toISOString(),
+            scheduleConfig: createDefaultScheduleConfiguration(),
+            participantColumnEligibility: current.participants.map((participant) => ({
+                participantId: participant.id,
+                columnIds: ['general'],
+            })),
             schedule: null,
         });
         const oldReusableConditions = current.conditions
@@ -290,6 +307,162 @@ export class WorkspaceService {
         this.workspace.update((current) => ({ ...current, activeSessionId: sessionId }));
         this.month.set(session.month);
         this.view.set('sessions');
+    }
+
+    activeScheduleConfiguration(): ScheduleConfiguration | undefined {
+        return this.activeSession()?.scheduleConfig;
+    }
+
+    columnEligibility(participantId: string, columnId: string): boolean {
+        const entry = this.activeSession()?.participantColumnEligibility.find(
+            (item) => item.participantId === participantId,
+        );
+        return !entry || entry.columnIds.includes(columnId);
+    }
+
+    toggleParticipantColumn(participantId: string, columnId: string): void {
+        this.updateActiveSession((session) => {
+            const existing = session.participantColumnEligibility.find(
+                (item) => item.participantId === participantId,
+            );
+            const current =
+                existing?.columnIds ?? session.scheduleConfig.columns.map((column) => column.id);
+            const columnIds = current.includes(columnId)
+                ? current.filter((id) => id !== columnId)
+                : [...current, columnId];
+            return {
+                ...session,
+                participantColumnEligibility: session.participantColumnEligibility.some(
+                    (item) => item.participantId === participantId,
+                )
+                    ? session.participantColumnEligibility.map((item) =>
+                          item.participantId === participantId ? { ...item, columnIds } : item,
+                      )
+                    : [...session.participantColumnEligibility, { participantId, columnIds }],
+                schedule: null,
+            };
+        });
+    }
+
+    setScheduleMode(mode: ScheduleConfiguration['mode']): void {
+        this.updateActiveSession((session) => ({
+            ...session,
+            scheduleConfig: { ...session.scheduleConfig, mode },
+            schedule: null,
+        }));
+    }
+
+    setAllowMultipleAssignmentsPerDay(allowed: boolean): void {
+        this.updateActiveSession((session) => ({
+            ...session,
+            scheduleConfig: {
+                ...session.scheduleConfig,
+                allowMultipleAssignmentsPerDay: allowed,
+            },
+            schedule: null,
+        }));
+    }
+
+    addScheduleColumn(label: string): void {
+        const normalizedLabel = label.trim();
+        if (!normalizedLabel) {
+            this.notice.set(this.languageService.translate('notice.columnNameRequired'));
+            return;
+        }
+        if ((this.activeScheduleConfiguration()?.columns.length ?? 0) >= 24) {
+            this.notice.set(this.languageService.translate('notice.columnLimit'));
+            return;
+        }
+        this.updateActiveSession((session) => {
+            const column = {
+                ...createDefaultScheduleColumn(),
+                id: createIdentifier('column'),
+                label: normalizedLabel,
+            };
+            return {
+                ...session,
+                scheduleConfig: {
+                    ...session.scheduleConfig,
+                    columns: [...session.scheduleConfig.columns, column],
+                },
+                participantColumnEligibility: session.participantColumnEligibility.map((entry) => ({
+                    ...entry,
+                    columnIds: [...entry.columnIds, column.id],
+                })),
+                schedule: null,
+            };
+        });
+    }
+
+    removeScheduleColumn(columnId: string): void {
+        const configuration = this.activeScheduleConfiguration();
+        if (!configuration || configuration.columns.length <= 1) {
+            this.notice.set(this.languageService.translate('notice.lastColumn'));
+            return;
+        }
+        this.updateActiveSession((session) => ({
+            ...session,
+            scheduleConfig: {
+                ...session.scheduleConfig,
+                columns: session.scheduleConfig.columns.filter((column) => column.id !== columnId),
+            },
+            participantColumnEligibility: session.participantColumnEligibility.map((entry) => ({
+                ...entry,
+                columnIds: entry.columnIds.filter((id) => id !== columnId),
+            })),
+            schedule: null,
+        }));
+    }
+
+    updateScheduleColumn(columnId: string, changes: Partial<ScheduleColumn>): void {
+        const session = this.activeSession();
+        if (!session) {
+            return;
+        }
+        const scheduleConfig = {
+            ...session.scheduleConfig,
+            columns: session.scheduleConfig.columns.map((column) =>
+                column.id === columnId ? { ...column, ...changes } : column,
+            ),
+        };
+        if (!scheduleConfigurationSchema.safeParse(scheduleConfig).success) {
+            this.notice.set(this.languageService.translate('notice.invalidScheduleSetting'));
+            return;
+        }
+        this.updateActiveSession((current) => ({
+            ...current,
+            scheduleConfig,
+            schedule: null,
+        }));
+    }
+
+    toggleScheduleColumnWeekday(columnId: string, weekday: number): void {
+        const column = this.activeScheduleConfiguration()?.columns.find(
+            (item) => item.id === columnId,
+        );
+        if (!column) {
+            return;
+        }
+        const weekdays = column.weekdays.includes(weekday)
+            ? column.weekdays.filter((value) => value !== weekday)
+            : [...column.weekdays, weekday].sort((left, right) => left - right);
+        if (weekdays.length === 0) {
+            return;
+        }
+        this.updateScheduleColumn(columnId, { weekdays });
+    }
+
+    private updateActiveSession(transform: (session: Session) => Session): void {
+        const activeSessionId = this.workspace().activeSessionId;
+        if (!activeSessionId) {
+            return;
+        }
+        this.workspace.update((current) => ({
+            ...current,
+            sessions: current.sessions.map((session) =>
+                session.id === activeSessionId ? transform(session) : session,
+            ),
+        }));
     }
 
     openConditionEditor(participantId: string, scope: ConditionScope, condition?: Condition): void {

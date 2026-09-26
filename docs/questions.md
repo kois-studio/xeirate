@@ -4,11 +4,12 @@ These questions are intentionally not requirements yet. Answers should be record
 
 ## Domain and scheduling
 
-- What exactly is a guardia: one 24-hour assignment per calendar day, named shifts, or a combination of areas and times?
+- What exact start/end semantics should apply when a shift crosses midnight or has partial-day availability?
 - Which requests are hard restrictions, which are soft preferences, and which are ambiguous notes for the coordinator to translate?
 - How should incompatible requests be surfaced and resolved? Can a coordinator record who yielded and carry that fairness credit into a later session?
 - Are double shifts allowed, and what rest or safety rules apply after a doublete?
-- How should rotations, areas, weekends, holidays, and course travel be represented?
+- How should rotations, holidays, qualifications, and course travel be represented across configurable columns?
+- Should time ranges affect overlap validation and rest calculations, or remain descriptive metadata for the first validated release?
 - What fairness dimensions matter: number of guardias, weekends, holidays, undesirable areas, consecutive work, or historical concessions?
 - What is the smallest synthetic schedule fixture that represents real complexity without importing private data?
 

@@ -32,6 +32,63 @@
 
             <div class="grid min-w-0 gap-4">
                 @if (store.activeSession(); as activeSession) {
+                    <section class="grid gap-4 border border-[#d8dfd9] bg-[#fffdf8] p-5 print:hidden" aria-labelledby="schedule-config-title">
+                        <div>
+                            <p class="mb-3 text-[0.67rem] font-medium tracking-[0.13em] text-[#49616a] uppercase">{{ 'sessions.configurationKicker' | t }}</p>
+                            <h2 id="schedule-config-title" class="mb-2 font-serif text-[clamp(1.8rem,4vw,2.4rem)] leading-[0.95] tracking-[-0.07em]">{{ 'sessions.configurationTitle' | t }}</h2>
+                            <p class="m-0 max-w-[42rem] text-[0.78rem] leading-[1.5] text-[#49616a]">{{ 'sessions.configurationIntro' | t }}</p>
+                        </div>
+
+                        <fieldset class="grid gap-2">
+                            <legend class="text-[0.73rem] font-medium">{{ 'sessions.displayMode' | t }}</legend>
+                            <div class="grid grid-cols-2 gap-2 max-[560px]:grid-cols-1">
+                                <app-button [ariaPressed]="activeSession.scheduleConfig.mode === 'single'" [buttonClass]="'rounded border px-3 py-2 text-left text-sm transition-transform active:scale-105 ' + (activeSession.scheduleConfig.mode === 'single' ? 'border-[#162b36] bg-[#e4ff69] text-[#162b36]' : 'border-[#aebdb4] text-[#49616a]')" (buttonClick)="store.setScheduleMode('single')"><strong class="block">{{ 'sessions.singleMode' | t }}</strong><small class="mt-1 block text-[0.68rem]">{{ 'sessions.singleModeHelp' | t }}</small></app-button>
+                                <app-button [ariaPressed]="activeSession.scheduleConfig.mode === 'columns'" [buttonClass]="'rounded border px-3 py-2 text-left text-sm transition-transform active:scale-105 ' + (activeSession.scheduleConfig.mode === 'columns' ? 'border-[#162b36] bg-[#e4ff69] text-[#162b36]' : 'border-[#aebdb4] text-[#49616a]')" (buttonClick)="store.setScheduleMode('columns')"><strong class="block">{{ 'sessions.columnsMode' | t }}</strong><small class="mt-1 block text-[0.68rem]">{{ 'sessions.columnsModeHelp' | t }}</small></app-button>
+                            </div>
+                        </fieldset>
+
+                        <label class="flex items-start gap-2 text-[0.76rem] text-[#49616a]"><input class="mt-0.5 h-4 w-4 accent-[#162b36]" type="checkbox" [checked]="activeSession.scheduleConfig.allowMultipleAssignmentsPerDay" (change)="store.setAllowMultipleAssignmentsPerDay($any($event.target).checked)" /> <span><strong class="block text-[#162b36]">{{ 'sessions.multipleAssignments' | t }}</strong>{{ 'sessions.multipleAssignmentsHelp' | t }}</span></label>
+
+                        <div class="grid gap-3">
+                            <div class="flex items-end justify-between gap-3">
+                                <div><h3 class="m-0 text-sm font-medium">{{ 'sessions.columnsTitle' | t }}</h3><p class="mt-1 mb-0 text-[0.7rem] text-[#49616a]">{{ 'sessions.columnsHelp' | t }}</p></div>
+                                @if (activeSession.scheduleConfig.mode === 'columns') {
+                                    <form class="flex gap-2" [formGroup]="columnForm" (ngSubmit)="addColumn()">
+                                        <label class="sr-only" for="new-column-label">{{ 'sessions.newColumn' | t }}</label>
+                                        <input class="min-h-10 w-32 rounded border border-[#aebdb4] bg-[#fffdf8] px-2.5 py-2 text-xs text-[#162b36] outline-none focus-visible:outline-3 focus-visible:outline-[#e4ff69] focus-visible:outline-offset-3" id="new-column-label" formControlName="label" [placeholder]="'sessions.newColumnPlaceholder' | t" maxlength="60" />
+                                        <app-button type="submit" buttonClass="inline-flex min-h-10 items-center justify-center rounded border border-[#162b36] px-3 py-2 text-xs font-medium text-[#162b36] active:scale-105">+</app-button>
+                                    </form>
+                                }
+                            </div>
+                            @for (column of activeSession.scheduleConfig.columns; track column.id) {
+                                <article class="grid gap-3 rounded border border-[#d8dfd9] bg-[#f4f3ed] p-3">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="grid min-w-0 gap-1"><label class="grid gap-1 text-[0.68rem] font-medium text-[#49616a]">{{ 'sessions.columnName' | t }}<input class="min-h-10 rounded border border-[#aebdb4] bg-[#fffdf8] px-2.5 py-2 text-sm font-medium text-[#162b36] outline-none focus-visible:outline-3 focus-visible:outline-[#e4ff69] focus-visible:outline-offset-3" [id]="'column-label-' + column.id" [value]="column.label" (change)="updateColumnLabel(column.id, $event)" maxlength="60" /></label><span class="text-[0.68rem] leading-[1.4] text-[#49616a]">{{ columnPreview(column) }}</span></div>
+                                        @if (activeSession.scheduleConfig.columns.length > 1) {
+                                            <app-button [ariaLabel]="'sessions.removeColumn' | t:{ name: column.label }" buttonClass="grid h-8 w-8 shrink-0 place-items-center rounded text-[#49616a] active:scale-105" (buttonClick)="store.removeScheduleColumn(column.id)">×</app-button>
+                                        }
+                                    </div>
+                                    <div class="grid grid-cols-4 gap-2 max-[760px]:grid-cols-2">
+                                        <label class="grid gap-1 text-[0.67rem] text-[#49616a]"><span>{{ 'sessions.requiredPeople' | t }}</span><input class="min-h-10 rounded border border-[#aebdb4] bg-[#fffdf8] px-2 py-2 text-sm text-[#162b36]" type="number" min="1" max="20" [value]="column.requiredPeople" (change)="updateColumnNumber(column.id, 'requiredPeople', $event)" /></label>
+                                        <label class="grid gap-1 text-[0.67rem] text-[#49616a]"><span>{{ 'sessions.everyDays' | t }}</span><input class="min-h-10 rounded border border-[#aebdb4] bg-[#fffdf8] px-2 py-2 text-sm text-[#162b36]" type="number" min="1" max="31" [value]="column.intervalDays" (change)="updateColumnNumber(column.id, 'intervalDays', $event)" /></label>
+                                        <label class="grid gap-1 text-[0.67rem] text-[#49616a]"><span>{{ 'sessions.shiftHours' | t }}</span><input class="min-h-10 rounded border border-[#aebdb4] bg-[#fffdf8] px-2 py-2 text-sm text-[#162b36]" type="number" min="0.5" max="168" step="0.5" [value]="column.shiftDurationHours ?? ''" (change)="updateColumnDuration(column.id, $event)" /></label>
+                                        <label class="grid gap-1 text-[0.67rem] text-[#49616a]"><span>{{ 'sessions.restDays' | t }}</span><input class="min-h-10 rounded border border-[#aebdb4] bg-[#fffdf8] px-2 py-2 text-sm text-[#162b36]" type="number" min="0" max="31" [value]="column.restDaysAfterAssignment" (change)="updateColumnNumber(column.id, 'restDaysAfterAssignment', $event)" /></label>
+                                    </div>
+                                    <details class="rounded border border-[#d8dfd9] bg-[#fffdf8] p-2.5"><summary class="cursor-pointer text-[0.7rem] font-medium text-[#162b36]">{{ 'sessions.advancedSettings' | t }}</summary><div class="mt-3 grid gap-3"><div class="flex flex-wrap gap-1.5"><span class="mr-1 self-center text-[0.67rem] text-[#49616a]">{{ 'sessions.activeDays' | t }}</span>@for (weekday of weekdays; track weekday.value) {<app-button [ariaLabel]="columnWeekdayLabel(weekday.value)" [ariaPressed]="column.weekdays.includes(weekday.value)" [buttonClass]="'grid h-8 w-8 place-items-center rounded-full border text-xs active:scale-105 ' + (column.weekdays.includes(weekday.value) ? 'border-[#162b36] bg-[#e4ff69] text-[#162b36]' : 'border-[#aebdb4] bg-[#fffdf8] text-[#49616a]')" (buttonClick)="store.toggleScheduleColumnWeekday(column.id, weekday.value)">{{ weekday.shortLabel }}</app-button>}</div><div class="grid grid-cols-2 gap-2 max-[560px]:grid-cols-1"><label class="grid gap-1 text-[0.67rem] text-[#49616a]"><span>{{ 'sessions.startTime' | t }}</span><input class="min-h-10 rounded border border-[#aebdb4] bg-[#fffdf8] px-2 py-2 text-sm text-[#162b36]" type="time" [value]="column.startTime ?? ''" (change)="updateColumnTime(column.id, 'startTime', $event)" /></label><label class="grid gap-1 text-[0.67rem] text-[#49616a]"><span>{{ 'sessions.endTime' | t }}</span><input class="min-h-10 rounded border border-[#aebdb4] bg-[#fffdf8] px-2 py-2 text-sm text-[#162b36]" type="time" [value]="column.endTime ?? ''" (change)="updateColumnTime(column.id, 'endTime', $event)" /></label></div></div></details>
+                                </article>
+                            }
+                        </div>
+
+                        @if (activeSession.scheduleConfig.mode === 'columns') {
+                            <div class="grid gap-2">
+                            <h3 class="m-0 text-sm font-medium">{{ 'sessions.eligibilityTitle' | t }}</h3>
+                            <p class="m-0 text-[0.7rem] leading-[1.4] text-[#49616a]">{{ 'sessions.eligibilityHelp' | t }}</p>
+                            @for (participant of store.activeParticipants(); track participant.id) {
+                                <div class="flex flex-wrap items-center gap-2 border-t border-[#d8dfd9] pt-2"><strong class="mr-1 min-w-20 text-xs text-[#162b36]">{{ participant.alias }}</strong>@for (column of activeSession.scheduleConfig.columns; track column.id) {<app-button [ariaLabel]="column.label + ' · ' + participant.alias" [ariaPressed]="store.columnEligibility(participant.id, column.id)" [buttonClass]="'rounded border px-2.5 py-1.5 text-[0.68rem] active:scale-105 ' + (store.columnEligibility(participant.id, column.id) ? 'border-[#162b36] bg-[#e4ff69] text-[#162b36]' : 'border-[#aebdb4] bg-[#fffdf8] text-[#49616a]')" (buttonClick)="store.toggleParticipantColumn(participant.id, column.id)">{{ column.label }}</app-button>}</div>
+                            }
+                            </div>
+                        }
+                    </section>
                     <section class="border border-[#d8dfd9] bg-[#fffdf8] p-5 print:hidden" aria-labelledby="session-detail-title">
                         <div class="flex items-start justify-between gap-4">
                             <div><p class="mb-3 text-[0.67rem] font-medium tracking-[0.13em] text-[#49616a] uppercase">{{ 'sessions.active' | t }}</p><h2 id="session-detail-title" class="mb-2 font-serif text-[clamp(2rem,5vw,3rem)] leading-[0.95] tracking-[-0.075em]">{{ 'sessions.requestsFor' | t:{ month: store.monthLabel(activeSession.month) } }}</h2></div>

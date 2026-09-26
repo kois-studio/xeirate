@@ -3,6 +3,7 @@ import {
     getDaysInMonth,
     type Participant,
     type Schedule,
+    type ScheduleColumn,
     type ScheduleIssue,
     type Session,
 } from './domain';
@@ -13,6 +14,14 @@ export type ScheduleInput = {
     conditions: Condition[];
     attempt: number;
     generatedAt?: string;
+};
+
+type CoverageSlot = {
+    id: string;
+    date: string;
+    day: number;
+    column: ScheduleColumn;
+    ordinal: number;
 };
 
 type Candidate = {
@@ -68,6 +77,87 @@ function issue(
     return { id, severity, kind, message, date, participantId };
 }
 
+function buildCoverageSlots(session: Session): CoverageSlot[] {
+    const days = getDaysInMonth(session.month);
+    const slots: CoverageSlot[] = [];
+
+    for (let day = 1; day <= days; day += 1) {
+        const date = dateForDay(session.month, day);
+        const weekday = new Date(`${date}T12:00:00`).getDay();
+
+        for (const column of session.scheduleConfig.columns) {
+            if (!column.weekdays.includes(weekday) || (day - 1) % column.intervalDays !== 0) {
+                continue;
+            }
+            for (let requiredIndex = 0; requiredIndex < column.requiredPeople; requiredIndex += 1) {
+                slots.push({
+                    id: `${column.id}-${date}-${requiredIndex + 1}`,
+                    date,
+                    day,
+                    column,
+                    ordinal: slots.length,
+                });
+            }
+        }
+    }
+
+    return slots;
+}
+
+function eligibilityFor(session: Session, participantId: string, columnId: string): boolean {
+    const entry = session.participantColumnEligibility.find(
+        (item) => item.participantId === participantId,
+    );
+    return !entry || entry.columnIds.includes(columnId);
+}
+
+function hasAssignmentOnDate(
+    assignments: Schedule['assignments'],
+    participantId: string,
+    date: string,
+): boolean {
+    return assignments.some(
+        (assignment) => assignment.participantId === participantId && assignment.date === date,
+    );
+}
+
+function hasAssignmentInColumn(
+    assignments: Schedule['assignments'],
+    participantId: string,
+    date: string,
+    columnId: string,
+): boolean {
+    return assignments.some(
+        (assignment) =>
+            assignment.participantId === participantId &&
+            assignment.date === date &&
+            assignment.columnId === columnId,
+    );
+}
+
+function dateDistance(left: string, right: string): number {
+    const leftTime = new Date(`${left}T12:00:00`).getTime();
+    const rightTime = new Date(`${right}T12:00:00`).getTime();
+    return Math.round(Math.abs(leftTime - rightTime) / 86_400_000);
+}
+
+function lastAssignmentDate(
+    assignments: Schedule['assignments'],
+    participantId: string,
+    beforeDate: string,
+): string | null {
+    return (
+        assignments
+            .filter(
+                (assignment) =>
+                    assignment.participantId === participantId && assignment.date < beforeDate,
+            )
+            .map((assignment) => assignment.date)
+            .sort()
+            .at(-1) ?? null
+    );
+}
+
 export function generateSchedule({
     session,
     participants,
@@ -76,37 +166,56 @@ export function generateSchedule({
     generatedAt = new Date().toISOString(),
 }: ScheduleInput): Schedule {
     const random = createRandom(`${session.id}:${attempt}`);
-    const days = getDaysInMonth(session.month);
+    const slots = buildCoverageSlots(session);
     const sessionConditions = conditions.filter(
         (condition) => condition.sessionId === null || condition.sessionId === session.id,
     );
     const assignmentCounts = new Map(participants.map((participant) => [participant.id, 0]));
     const weekendCounts = new Map(participants.map((participant) => [participant.id, 0]));
     const assignments: Schedule['assignments'] = [];
+    const bestPartialAssignments: Schedule['assignments'] = [];
     const issues: ScheduleIssue[] = [];
     let totalScore = 0;
-    let preferenceBreaks = 0;
-    let previousParticipantId: string | null = null;
+    let searchNodes = 0;
 
-    for (let day = 1; day <= days; day += 1) {
-        const date = dateForDay(session.month, day);
-        const eligibleParticipants = participants.filter((participant) =>
-            sessionConditions.every(
+    function candidatesFor(slot: CoverageSlot): Candidate[] {
+        const previousParticipantId = assignments.at(-1)?.participantId ?? null;
+        const eligibleParticipants = participants.filter((participant) => {
+            if (!eligibilityFor(session, participant.id, slot.column.id)) {
+                return false;
+            }
+            if (
+                !session.scheduleConfig.allowMultipleAssignmentsPerDay &&
+                hasAssignmentOnDate(assignments, participant.id, slot.date)
+            ) {
+                return false;
+            }
+            if (hasAssignmentInColumn(assignments, participant.id, slot.date, slot.column.id)) {
+                return false;
+            }
+            const lastDate = lastAssignmentDate(assignments, participant.id, slot.date);
+            if (
+                lastDate &&
+                dateDistance(lastDate, slot.date) <= slot.column.restDaysAfterAssignment
+            ) {
+                return false;
+            }
+            return sessionConditions.every(
                 (condition) =>
                     condition.participantId !== participant.id ||
                     condition.kind !== 'restriction' ||
-                    !conditionApplies(condition, date),
-            ),
-        );
+                    !conditionApplies(condition, slot.date),
+            );
+        });
 
-        const candidates: Candidate[] = eligibleParticipants.map((participant) => {
+        const candidates = eligibleParticipants.map((participant) => {
             const count = assignmentCounts.get(participant.id) ?? 0;
             const weekendCount = weekendCounts.get(participant.id) ?? 0;
             const relevantPreferences = sessionConditions.filter(
                 (condition) =>
                     condition.participantId === participant.id &&
                     condition.kind === 'preference' &&
-                    conditionApplies(condition, date),
+                    conditionApplies(condition, slot.date),
             );
             const preferencePenalty = relevantPreferences.reduce(
                 (penalty, condition) =>
@@ -123,53 +232,123 @@ export function generateSchedule({
             const scoreDifference = left.score - right.score;
             return scoreDifference === 0 ? left.jitter - right.jitter : scoreDifference;
         });
+        return candidates;
+    }
 
-        const selected = candidates[0];
-        if (!selected) {
+    function search(slotIndex: number): boolean {
+        searchNodes += 1;
+        if (searchNodes > 100_000) {
+            return false;
+        }
+        if (assignments.length > bestPartialAssignments.length) {
+            bestPartialAssignments.splice(0, bestPartialAssignments.length, ...assignments);
+        }
+        if (slotIndex >= slots.length) {
+            return true;
+        }
+
+        const slot = slots[slotIndex];
+        if (!slot) {
+            return true;
+        }
+        for (const candidate of candidatesFor(slot)) {
+            const assignment = {
+                slotId: slot.id,
+                date: slot.date,
+                columnId: slot.column.id,
+                participantId: candidate.participant.id,
+            };
+            assignments.push(assignment);
+            assignmentCounts.set(
+                candidate.participant.id,
+                (assignmentCounts.get(candidate.participant.id) ?? 0) + 1,
+            );
+            if (isWeekend(slot.date)) {
+                weekendCounts.set(
+                    candidate.participant.id,
+                    (weekendCounts.get(candidate.participant.id) ?? 0) + 1,
+                );
+            }
+            totalScore += candidate.score + candidate.jitter;
+
+            if (search(slotIndex + 1)) {
+                return true;
+            }
+
+            totalScore -= candidate.score + candidate.jitter;
+            if (isWeekend(slot.date)) {
+                weekendCounts.set(
+                    candidate.participant.id,
+                    (weekendCounts.get(candidate.participant.id) ?? 0) - 1,
+                );
+            }
+            assignmentCounts.set(
+                candidate.participant.id,
+                (assignmentCounts.get(candidate.participant.id) ?? 0) - 1,
+            );
+            assignments.pop();
+        }
+        return false;
+    }
+
+    const solved = search(0);
+    if (!solved) {
+        assignments.splice(0, assignments.length, ...bestPartialAssignments);
+        const assignedSlotIds = new Set(assignments.map((assignment) => assignment.slotId));
+        for (const slot of slots) {
+            if (assignedSlotIds.has(slot.id)) {
+                continue;
+            }
             issues.push(
                 issue(
-                    `unassigned-${date}`,
+                    `unassigned-${slot.id}`,
                     'error',
                     'unassigned',
-                    'No hay una persona disponible para este día con las restricciones actuales.',
-                    date,
+                    'No hay una persona disponible para este turno con la configuración y restricciones actuales.',
+                    slot.date,
                     null,
                 ),
             );
-            previousParticipantId = null;
-            continue;
         }
+    }
 
-        assignments.push({ date, participantId: selected.participant.id });
-        assignmentCounts.set(
-            selected.participant.id,
-            (assignmentCounts.get(selected.participant.id) ?? 0) + 1,
-        );
-        if (isWeekend(date)) {
-            weekendCounts.set(
-                selected.participant.id,
-                (weekendCounts.get(selected.participant.id) ?? 0) + 1,
+    if (!solved) {
+        for (const participant of participants) {
+            assignmentCounts.set(participant.id, 0);
+            weekendCounts.set(participant.id, 0);
+        }
+        for (const assignment of assignments) {
+            assignmentCounts.set(
+                assignment.participantId,
+                (assignmentCounts.get(assignment.participantId) ?? 0) + 1,
             );
+            if (isWeekend(assignment.date)) {
+                weekendCounts.set(
+                    assignment.participantId,
+                    (weekendCounts.get(assignment.participantId) ?? 0) + 1,
+                );
+            }
         }
-        totalScore += selected.score + selected.jitter;
-        previousParticipantId = selected.participant.id;
+        totalScore = 0;
+    }
 
-        const brokenPreferences = sessionConditions.filter(
-            (condition) =>
-                condition.participantId === selected.participant.id &&
-                condition.kind === 'preference' &&
-                condition.preferenceMode === 'avoid' &&
-                conditionApplies(condition, date),
-        );
-        for (const condition of brokenPreferences) {
+    let preferenceBreaks = 0;
+    for (const assignment of assignments) {
+        for (const condition of sessionConditions.filter(
+            (item) =>
+                item.participantId === assignment.participantId &&
+                item.kind === 'preference' &&
+                item.preferenceMode === 'avoid' &&
+                conditionApplies(item, assignment.date),
+        )) {
             preferenceBreaks += 1;
             issues.push(
                 issue(
-                    `preference-${condition.id}-${date}`,
+                    `preference-${condition.id}-${assignment.slotId}`,
                     'warning',
                     'preference',
                     'Esta preferencia no se ha podido respetar en esta propuesta.',
-                    date,
+                    assignment.date,
                     condition.participantId,
                 ),
             );

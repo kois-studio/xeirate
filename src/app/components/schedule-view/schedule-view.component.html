@@ -11,15 +11,19 @@
                 (buttonClick)="store.generateCurrentSchedule()"
             ><span aria-hidden="true">{{ store.activeSchedule() ? '↻' : '✦' }}</span> {{ store.activeSchedule() ? ('schedule.retry' | t) : ('schedule.generate' | t) }}</app-button>
         </div>
+        <div class="hidden print:mb-4 print:block">
+            <p class="m-0 text-[0.65rem] font-medium tracking-[0.12em] text-black uppercase">Xeirate</p>
+            <h2 class="m-0 font-serif text-3xl leading-none text-black">{{ 'schedule.title' | t:{ month: store.monthLabel(session.month) } }}</h2>
+        </div>
 
         @if (store.activeSchedule(); as schedule) {
-            <div class="mb-3 grid grid-cols-3 gap-2 max-[760px]:grid-cols-1">
+            <div class="mb-3 grid grid-cols-3 gap-2 max-[760px]:grid-cols-1 print:hidden">
                 <div class="grid gap-1 bg-[#213b47] p-3"><strong class="text-xl tracking-[-0.05em] text-[#e4ff69]">{{ schedule.assignments.length }}</strong><span class="text-[0.7rem] text-[#aec2c5]">{{ 'schedule.assigned' | t }}</span></div>
                 <div class="grid gap-1 bg-[#213b47] p-3"><strong class="text-xl tracking-[-0.05em] text-[#e4ff69]">{{ schedule.fairness.maxDifference }}</strong><span class="text-[0.7rem] text-[#aec2c5]">{{ 'schedule.maxDifference' | t }}</span></div>
                 <div class="grid gap-1 bg-[#213b47] p-3"><strong class="text-xl tracking-[-0.05em] text-[#e4ff69]">{{ store.scheduleErrors().length + store.scheduleWarnings().length }}</strong><span class="text-[0.7rem] text-[#aec2c5]">{{ 'schedule.alertCount' | t }}</span></div>
             </div>
             @if (store.scheduleIssues().length > 0) {
-                <ul class="mb-4 grid gap-2 p-0" [attr.aria-label]="'schedule.alerts' | t">
+                <ul class="mb-4 grid gap-2 p-0 print:hidden" [attr.aria-label]="'schedule.alerts' | t">
                     @for (issue of store.scheduleIssues().slice(0, 4); track issue.id) {
                         <li class="p-3 text-[0.74rem] leading-[1.45]" [class.bg-[#6f3f36]]="issue.severity === 'error'" [class.text-[#ffe4d8]]="issue.severity === 'error'" [class.bg-[#5f552e]]="issue.severity === 'warning'" [class.text-[#fff3bd]]="issue.severity === 'warning'" [class.bg-[#2d505d]]="issue.severity === 'info'" [class.text-[#d9edef]]="issue.severity === 'info'">{{ store.scheduleIssueLabel(issue) }}</li>
                     }
@@ -28,36 +32,71 @@
                     }
                 </ul>
             } @else {
-                <p class="mb-4 bg-[#2d505d] p-3 text-[0.74rem] leading-[1.45] text-[#d9edef]">{{ 'schedule.noAlerts' | t }}</p>
+                <p class="mb-4 bg-[#2d505d] p-3 text-[0.74rem] leading-[1.45] text-[#d9edef] print:hidden">{{ 'schedule.noAlerts' | t }}</p>
             }
             <div class="mb-5 flex flex-wrap gap-2 print:hidden">
                 <app-button buttonClass="inline-flex min-h-11 items-center justify-center gap-2 rounded-[0.4rem] bg-[#e4ff69] px-4 py-2.5 text-sm font-medium text-[#162b36] transition-transform duration-150 hover:-translate-y-px active:scale-105" (buttonClick)="store.shareSchedule()">{{ 'schedule.share' | t }}</app-button>
                 <app-button buttonClass="inline-flex min-h-11 items-center justify-center gap-2 rounded-[0.4rem] border border-[#60737b] px-4 py-2.5 text-sm font-medium text-white transition-transform duration-150 hover:border-[#e4ff69] hover:bg-[#233b46] active:scale-105" (buttonClick)="store.printSchedule()">{{ 'schedule.print' | t }}</app-button>
             </div>
         } @else {
-                <div class="mb-5 flex gap-3 bg-[#213b47] p-4">
+            <div class="mb-5 flex gap-3 bg-[#213b47] p-4">
                 <span class="grid h-7 w-7 shrink-0 place-items-center bg-[#e4ff69] text-[#162b36]" aria-hidden="true">☼</span>
                 <div><strong class="mb-1 block text-sm">{{ 'schedule.readyTitle' | t }}</strong><p class="m-0 text-[0.78rem] leading-[1.45] text-[#aec2c5]">{{ 'schedule.readyBody' | t }}</p></div>
             </div>
         }
 
-        <ul class="grid grid-cols-7 gap-1.5 p-0 max-[760px]:grid-cols-4 print:grid-cols-7" [attr.aria-label]="'schedule.calendarDays' | t:{ month: store.monthLabel(session.month) }">
-            @for (date of calendarDates(session); track date) {
-                @if (store.scheduleAssignments().get(date); as assignment) {
-                    <li class="flex min-h-24 flex-col border border-[#e4ff69] bg-[#e4ff69] p-2 text-[#162b36] print:border-[#bbb] print:bg-white print:text-black">
-                        <span class="text-[0.58rem] font-medium uppercase print:text-black">{{ store.calendarWeekdayLabel(date) }}</span>
-                        <span class="mt-1 font-serif text-xl leading-none print:text-black">{{ dayNumber(date) }}</span>
-                        <span class="mt-auto overflow-hidden text-ellipsis whitespace-nowrap text-[0.64rem] font-medium leading-tight">{{ assignmentAlias(assignment.participantId) }}</span>
-                    </li>
-                } @else {
-                    <li class="flex min-h-24 flex-col border border-[#35515b] bg-[#1e3742] p-2 print:border-[#bbb] print:bg-white">
+        @if (session.scheduleConfig.mode === 'columns') {
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[42rem] border-collapse text-left" [attr.aria-label]="'schedule.calendarDays' | t:{ month: store.monthLabel(session.month) }">
+                    <thead>
+                        <tr>
+                            <th class="w-14 border border-[#35515b] bg-[#213b47] p-2 text-[0.62rem] font-medium uppercase print:border-[#bbb] print:bg-white print:text-black">{{ 'schedule.day' | t }}</th>
+                            @for (column of session.scheduleConfig.columns; track column.id) {
+                                <th class="border border-[#35515b] bg-[#e4ff69] p-2 text-[0.66rem] font-semibold text-[#162b36] print:border-[#bbb] print:bg-white print:text-black">{{ column.label }}</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (date of calendarDates(session); track date) {
+                            <tr>
+                                <th scope="row" class="border border-[#35515b] bg-[#213b47] p-2 align-top text-left print:border-[#bbb] print:bg-white print:text-black"><span class="block text-[0.55rem] uppercase text-[#aec2c5] print:text-black">{{ store.calendarWeekdayLabel(date) }}</span><span class="font-serif text-xl leading-none">{{ dayNumber(date) }}</span></th>
+                                @for (column of session.scheduleConfig.columns; track column.id) {
+                                    <td class="min-w-32 border border-[#35515b] bg-[#1e3742] p-2 align-top print:border-[#bbb] print:bg-white print:text-black">
+                                        @if (assignmentsForColumn(date, column.id).length > 0) {
+                                            <ul class="grid gap-1 p-0 text-[0.68rem] leading-tight">
+                                                @for (assignment of assignmentsForColumn(date, column.id); track assignment.slotId + assignment.participantId) {
+                                                    <li class="font-medium text-[#e4ff69] print:text-black">{{ assignmentAlias(assignment.participantId) }}</li>
+                                                }
+                                            </ul>
+                                        } @else {
+                                            <span class="text-[0.64rem] text-[#aec2c5] print:text-black">{{ 'schedule.unassigned' | t }}</span>
+                                        }
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        } @else {
+            <ul class="grid grid-cols-7 gap-1.5 p-0 max-[760px]:grid-cols-4 print:grid-cols-7" [attr.aria-label]="'schedule.calendarDays' | t:{ month: store.monthLabel(session.month) }">
+                @for (date of calendarDates(session); track date) {
+                    <li class="flex min-h-24 flex-col border border-[#35515b] bg-[#1e3742] p-2 print:border-[#bbb] print:bg-white print:text-black">
                         <span class="text-[0.58rem] font-medium text-[#aec2c5] uppercase print:text-black">{{ store.calendarWeekdayLabel(date) }}</span>
                         <span class="mt-1 font-serif text-xl leading-none text-white print:text-black">{{ dayNumber(date) }}</span>
-                        <span class="mt-auto overflow-hidden text-ellipsis whitespace-nowrap text-[0.64rem] leading-tight text-[#aec2c5] print:text-black">{{ 'schedule.unassigned' | t }}</span>
+                        @if (assignmentsForDate(date).length > 0) {
+                            <ul class="mt-2 grid gap-1 p-0 text-[0.64rem] font-medium leading-tight text-[#e4ff69] print:text-black">
+                                @for (assignment of assignmentsForDate(date); track assignment.slotId + assignment.participantId) {
+                                    <li>{{ assignmentAlias(assignment.participantId) }}</li>
+                                }
+                            </ul>
+                        } @else {
+                            <span class="mt-auto overflow-hidden text-ellipsis whitespace-nowrap text-[0.64rem] leading-tight text-[#aec2c5] print:text-black">{{ 'schedule.unassigned' | t }}</span>
+                        }
                     </li>
                 }
-            }
-        </ul>
+            </ul>
+        }
     </section>
 } @else {
     <div class="flex min-h-56 flex-col items-center justify-center gap-2 rounded border border-[#d8dfd9] bg-[#fffdf8] text-center text-sm text-[#49616a]">

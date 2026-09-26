@@ -2,7 +2,7 @@
 
 ## Product boundary
 
-Xeirate is a local-first assistant for turning informal staff requests into a reviewable monthly guardia schedule. A coordinator translates real-world language into structured conditions; the application generates candidate schedules and makes conflicts visible. It is a decision-support tool, not a replacement for clinical or institutional responsibility.
+Xeirate is a local-first assistant for turning informal staff requests into a reviewable schedule of recurring turns or duties. A coordinator translates real-world language into structured conditions; the application generates candidate schedules and makes conflicts visible. It is a decision-support tool, not a replacement for clinical, institutional, or operational responsibility.
 
 The first release is intentionally small: no accounts, no server persistence, no patient data, no analytics, and no remote processing.
 
@@ -40,7 +40,7 @@ The initial slice may keep these boundaries in a small number of files, but it m
 8. The coordinator reviews conflicts, clarification warnings, and fairness summary.
 9. The coordinator shares text or opens the browser print flow to save a PDF.
 
-The current implementation covers this workflow with one guardia per calendar day. The rule set remains provisional until the open domain questions are resolved; the app intentionally does not infer areas, doubletes, or institutional policies.
+The current implementation supports a default single calendar plus an optional column layout. A session can define independent coverage columns, cadence, required people, eligibility, and rest days. The rule set remains provisional until the open domain questions are resolved; the app intentionally does not infer institutional policies.
 
 ## Styling and interaction
 

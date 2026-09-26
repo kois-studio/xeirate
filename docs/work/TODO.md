@@ -9,7 +9,7 @@
 - **Scope:** condition taxonomy, dates/ranges, areas, travel/courses, fixed reusable conditions, conflict explanation, concession/fairness record.
 - **Non-goals:** importing real workplace requests into tests or making clinical staffing policy decisions.
 - **Acceptance criteria:** A coordinator can enter bounded restrictions/preferences/clarifications, generate and retry a monthly proposal, see unresolved or impossible cases, and review a synthetic November-style fixture without real personal data.
-- **Current implementation note:** A provisional intake schema, deterministic heuristic, fairness summary, conflict warnings, grouped per-person session rows, fixed conditions with selected recurring weekdays, anonymized fixture, and text/print export exist. Areas, doubletes, concession history, and department-specific policies must not be inferred from this demo.
+- **Current implementation note:** A provisional intake schema, deterministic heuristic, fairness summary, conflict warnings, grouped per-person session rows, fixed conditions with selected recurring weekdays, configurable coverage columns/cadence/rest rules, per-person column eligibility, anonymized fixture, and text/print export exist. Exact time-overlap semantics, doubletes, concession history, and department-specific policies must not be inferred from this demo.
 - **Verification:** domain examples, decision record, deterministic unit tests.
 - **Affected areas:** domain, scheduling, persistence, docs.
 - **Dependencies:** The initial implementation slice and answers to `docs/questions.md`.

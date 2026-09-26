@@ -1,6 +1,16 @@
 import { describe, expect, test } from 'bun:test';
 
-import type { Condition, Participant, Session } from './domain';
+import {
+    createDefaultScheduleConfiguration,
+    type Condition,
+    type Participant,
+    type Session,
+} from './domain';
+import {
+    acceptanceConfiguration,
+    acceptanceParticipants,
+    createAcceptanceWorkspace,
+} from './acceptance-fixture';
 import { generateSchedule } from './scheduler';
 
 const participants: Participant[] = [
@@ -14,6 +24,11 @@ const session: Session = {
     month: '2026-11',
     participantIds: participants.map((participant) => participant.id),
     createdAt: '2026-09-19T10:00:00.000Z',
+    scheduleConfig: createDefaultScheduleConfiguration(),
+    participantColumnEligibility: participants.map((participant) => ({
+        participantId: participant.id,
+        columnIds: ['general'],
+    })),
     schedule: null,
 };
 
@@ -187,6 +202,158 @@ describe('schedule generation', () => {
                 (assignment) =>
                     [2, 4].includes(new Date(`${assignment.date}T12:00:00`).getDay()) &&
                     assignment.participantId === 'person-a',
+            ),
+        ).toBe(false);
+    });
+
+    test('generates multiple assignments across configured columns', () => {
+        const result = generateSchedule({
+            session: {
+                ...session,
+                scheduleConfig: {
+                    ...createDefaultScheduleConfiguration(),
+                    mode: 'columns',
+                    columns: [
+                        {
+                            ...createDefaultScheduleConfiguration().columns[0],
+                            id: 'morning',
+                            label: 'Morning',
+                            requiredPeople: 1,
+                        },
+                        {
+                            ...createDefaultScheduleConfiguration().columns[0],
+                            id: 'evening',
+                            label: 'Evening',
+                            requiredPeople: 1,
+                        },
+                    ],
+                },
+                participantColumnEligibility: [
+                    { participantId: 'person-a', columnIds: ['morning'] },
+                    { participantId: 'person-b', columnIds: ['evening'] },
+                ],
+            },
+            participants: participants.slice(0, 2),
+            conditions: [],
+            attempt: 1,
+            generatedAt: '2026-09-19T10:00:00.000Z',
+        });
+
+        expect(result.assignments).toHaveLength(60);
+        expect(new Set(result.assignments.map((assignment) => assignment.columnId))).toEqual(
+            new Set(['morning', 'evening']),
+        );
+    });
+
+    test('applies independent cadence and rest rules', () => {
+        const configuration = createDefaultScheduleConfiguration();
+        const result = generateSchedule({
+            session: {
+                ...session,
+                scheduleConfig: {
+                    ...configuration,
+                    columns: [
+                        {
+                            ...configuration.columns[0],
+                            requiredPeople: 1,
+                            intervalDays: 3,
+                            restDaysAfterAssignment: 2,
+                        },
+                    ],
+                },
+                participantColumnEligibility: [
+                    { participantId: 'person-a', columnIds: ['general'] },
+                    { participantId: 'person-b', columnIds: ['general'] },
+                ],
+            },
+            participants: participants.slice(0, 2),
+            conditions: [],
+            attempt: 1,
+            generatedAt: '2026-09-19T10:00:00.000Z',
+        });
+
+        expect(result.assignments).toHaveLength(10);
+        expect(new Set(result.assignments.map((assignment) => assignment.date)).size).toBe(10);
+    });
+
+    test('solves a constrained choice by backtracking instead of accepting a dead end', () => {
+        const configuration = createDefaultScheduleConfiguration();
+        const result = generateSchedule({
+            session: {
+                ...session,
+                scheduleConfig: {
+                    ...configuration,
+                    columns: [
+                        {
+                            ...configuration.columns[0],
+                            restDaysAfterAssignment: 1,
+                        },
+                    ],
+                },
+            },
+            participants: participants.slice(0, 2),
+            conditions: [
+                {
+                    id: 'backtrack-preference',
+                    sessionId: session.id,
+                    participantId: 'person-b',
+                    kind: 'preference',
+                    preferenceMode: 'avoid',
+                    startDate: '2026-11-01',
+                    endDate: '2026-11-01',
+                    weekdays: null,
+                    note: 'Synthetic preference.',
+                    reusable: false,
+                    createdAt: '2026-09-19T10:00:00.000Z',
+                },
+                {
+                    id: 'backtrack-restriction',
+                    sessionId: session.id,
+                    participantId: 'person-b',
+                    kind: 'restriction',
+                    preferenceMode: null,
+                    startDate: '2026-11-02',
+                    endDate: '2026-11-02',
+                    weekdays: null,
+                    note: 'Synthetic restriction.',
+                    reusable: false,
+                    createdAt: '2026-09-19T10:00:00.000Z',
+                },
+            ],
+            attempt: 1,
+            generatedAt: '2026-09-19T10:00:00.000Z',
+        });
+
+        expect(result.issues.filter((item) => item.kind === 'unassigned')).toHaveLength(0);
+        expect(result.assignments[0]?.participantId).toBe('person-b');
+        expect(result.assignments[1]?.participantId).toBe('person-a');
+    });
+
+    test('covers the acceptance fixture across multiple columns and cadences', () => {
+        const workspace = createAcceptanceWorkspace();
+        const acceptanceSession = workspace.sessions[0];
+        if (!acceptanceSession) {
+            throw new Error('Acceptance fixture is missing its session.');
+        }
+        const result = generateSchedule({
+            session: acceptanceSession,
+            participants: acceptanceParticipants,
+            conditions: workspace.conditions,
+            attempt: 1,
+            generatedAt: '2026-09-26T10:00:00.000Z',
+        });
+
+        expect(result.assignments).toHaveLength(60);
+        expect(result.issues.filter((item) => item.kind === 'unassigned')).toHaveLength(0);
+        expect(new Set(result.assignments.map((assignment) => assignment.columnId))).toEqual(
+            new Set(acceptanceConfiguration.columns.map((column) => column.id)),
+        );
+        expect(
+            result.assignments.some(
+                (assignment) =>
+                    assignment.participantId === 'acceptance-alpha' &&
+                    assignment.date >= '2026-11-10' &&
+                    assignment.date <= '2026-11-12',
             ),
         ).toBe(false);
     });

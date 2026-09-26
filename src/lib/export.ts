@@ -63,10 +63,25 @@ export function formatScheduleForSharing(
         '',
     ];
 
+    const assignmentsByDate = new Map<string, Schedule['assignments']>();
     for (const assignment of schedule.assignments) {
-        lines.push(
-            `${formatDate(assignment.date, language)}: ${participantAlias(participants, assignment.participantId, language)}`,
-        );
+        const assignments = assignmentsByDate.get(assignment.date) ?? [];
+        assignments.push(assignment);
+        assignmentsByDate.set(assignment.date, assignments);
+    }
+
+    for (const [date, assignments] of assignmentsByDate) {
+        const values = assignments.map((assignment) => {
+            const participant = participantAlias(participants, assignment.participantId, language);
+            if (session.scheduleConfig.mode === 'columns') {
+                const column = session.scheduleConfig.columns.find(
+                    (item) => item.id === assignment.columnId,
+                )?.label;
+                return column ? `${column}: ${participant}` : participant;
+            }
+            return participant;
+        });
+        lines.push(`${formatDate(date, language)}: ${values.join(', ')}`);
     }
 
     if (schedule.issues.length > 0) {

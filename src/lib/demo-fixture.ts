@@ -1,4 +1,10 @@
-import { type Condition, createCondition, createSession, type Workspace } from './domain';
+import {
+    type Condition,
+    createCondition,
+    createDefaultScheduleConfiguration,
+    createSession,
+    type Workspace,
+} from './domain';
 
 const createdAt = '2026-09-19T10:00:00.000Z';
 const demoSessionId = 'demo-session-november';
@@ -53,6 +59,11 @@ export function createDemoWorkspace(language: DemoLanguage = 'es'): Workspace {
         month: '2026-11',
         participantIds: demoParticipants.map((participant) => participant.id),
         createdAt,
+        scheduleConfig: createDefaultScheduleConfiguration(),
+        participantColumnEligibility: demoParticipants.map((participant) => ({
+            participantId: participant.id,
+            columnIds: ['general'],
+        })),
         schedule: null,
     });
 
