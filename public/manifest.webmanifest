@@ -4,8 +4,8 @@
     "lang": "es",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#fcfbf7",
-    "theme_color": "#dff3e8",
+    "background_color": "#f4f3ed",
+    "theme_color": "#e4ff69",
     "description": "Prepara propuestas mensuales de guardias de forma clara y local.",
     "icons": [
         {

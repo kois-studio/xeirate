@@ -1,0 +1,20 @@
+<li class="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2.5 rounded border border-[#d8dfd9] bg-[#f4f3ed] p-2.5 max-[760px]:grid-cols-[auto_minmax(0,1fr)]">
+    <app-button
+        [ariaLabel]="condition().kind === 'clarification' ? ('condition.pending' | t) : ('condition.change' | t:{ kind: store.conditionKindLabel(condition().kind).toLocaleLowerCase() })"
+        [buttonClass]="'min-w-[5.2rem] rounded px-2 py-1.5 text-[0.62rem] font-medium transition-transform duration-150 active:scale-105 disabled:cursor-not-allowed disabled:opacity-50 ' + (condition().kind === 'restriction' ? 'bg-[#ffd8c2] text-[#8e4938]' : condition().kind === 'preference' ? 'bg-[#fff0b3] text-[#735d16]' : 'bg-[#e4f0f1] text-[#3e6873]')"
+        [disabled]="condition().kind === 'clarification'"
+        (buttonClick)="store.toggleConditionKind(condition())"
+    >{{ store.conditionKindLabel(condition().kind) }}</app-button>
+    <div class="grid min-w-0 gap-1">
+        <strong class="text-[0.76rem] font-semibold">{{ store.conditionSummary(condition()) }}</strong>
+        <span class="overflow-hidden text-ellipsis whitespace-nowrap text-[0.7rem] leading-[1.4] text-[#49616a]">{{ condition().note }}</span>
+        @if (condition().sessionId === null) {
+            <small class="text-[0.7rem] leading-[1.4] text-[#54820b]">{{ 'condition.fixedForPerson' | t }}</small>
+        }
+    </div>
+    <app-button
+        [ariaLabel]="'condition.editAction' | t"
+        buttonClass="px-0 py-1 text-[0.68rem] font-medium text-[#162b36] underline-offset-4 hover:underline max-[760px]:col-start-2 max-[760px]:justify-self-start max-[760px]:pt-0"
+        (buttonClick)="store.openConditionEditor(condition().participantId, scope, condition())"
+    >{{ 'condition.editAction' | t }}</app-button>
+</li>

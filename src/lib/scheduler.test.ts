@@ -26,7 +26,7 @@ const conditions: Condition[] = [
         preferenceMode: null,
         startDate: '2026-11-01',
         endDate: '2026-11-05',
-        weekday: null,
+        weekdays: null,
         note: 'No disponible esos días.',
         reusable: false,
         createdAt: '2026-09-19T10:00:00.000Z',
@@ -39,7 +39,7 @@ const conditions: Condition[] = [
         preferenceMode: 'avoid',
         startDate: '2026-11-06',
         endDate: '2026-11-08',
-        weekday: null,
+        weekdays: null,
         note: 'Preferiría evitar esos días.',
         reusable: false,
         createdAt: '2026-09-19T10:00:00.000Z',
@@ -52,7 +52,7 @@ const conditions: Condition[] = [
         preferenceMode: null,
         startDate: null,
         endDate: null,
-        weekday: null,
+        weekdays: null,
         note: 'Revisar una petición interna.',
         reusable: false,
         createdAt: '2026-09-19T10:00:00.000Z',
@@ -93,7 +93,7 @@ describe('schedule generation', () => {
                     preferenceMode: null,
                     startDate: '2026-11-06',
                     endDate: '2026-11-08',
-                    weekday: null,
+                    weekdays: null,
                     note: 'Tampoco está disponible durante estos días.',
                     reusable: false,
                     createdAt: '2026-09-19T10:00:00.000Z',
@@ -145,7 +145,7 @@ describe('schedule generation', () => {
                     preferenceMode: null,
                     startDate: null,
                     endDate: null,
-                    weekday: null,
+                    weekdays: null,
                     note: 'No disponible este mes.',
                     reusable: false,
                     createdAt: '2026-09-19T10:00:00.000Z',
@@ -172,8 +172,8 @@ describe('schedule generation', () => {
                     preferenceMode: null,
                     startDate: null,
                     endDate: null,
-                    weekday: 2,
-                    note: 'No trabaja los martes.',
+                    weekdays: [2, 4],
+                    note: 'No trabaja los martes ni los jueves.',
                     reusable: true,
                     createdAt: '2026-09-19T10:00:00.000Z',
                 },
@@ -185,7 +185,7 @@ describe('schedule generation', () => {
         expect(
             result.assignments.some(
                 (assignment) =>
-                    new Date(`${assignment.date}T12:00:00`).getDay() === 2 &&
+                    [2, 4].includes(new Date(`${assignment.date}T12:00:00`).getDay()) &&
                     assignment.participantId === 'person-a',
             ),
         ).toBe(false);

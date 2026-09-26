@@ -1,13 +1,47 @@
 import { formatMonth, type Participant, type Schedule, type Session } from './domain';
 
-function participantAlias(participants: Participant[], participantId: string): string {
+type ShareLanguage = 'en' | 'es';
+
+const shareCopy = {
+    en: {
+        unnamed: 'Unnamed',
+        shiftsFor: 'Shifts for {month}',
+        proposal: 'Proposal {attempt} · Xeirate',
+        review: 'Review before sharing as final:',
+        issue: {
+            unassigned: 'No person is available for this day with the current restrictions.',
+            preference: 'This preference could not be respected in this proposal.',
+            clarification: 'There is a request that needs review before the calendar is final.',
+        },
+    },
+    es: {
+        unnamed: 'Sin nombre',
+        shiftsFor: 'Guardias de {month}',
+        proposal: 'Propuesta {attempt} · Xeirate',
+        review: 'Revisar antes de compartir como definitivo:',
+        issue: {
+            unassigned:
+                'No hay una persona disponible para este día con las restricciones actuales.',
+            preference: 'Esta preferencia no se ha podido respetar en esta propuesta.',
+            clarification:
+                'Hay una petición que necesita revisión antes de dar el calendario por bueno.',
+        },
+    },
+} satisfies Record<ShareLanguage, object>;
+
+function participantAlias(
+    participants: Participant[],
+    participantId: string,
+    language: ShareLanguage,
+): string {
     return (
-        participants.find((participant) => participant.id === participantId)?.alias ?? 'Sin nombre'
+        participants.find((participant) => participant.id === participantId)?.alias ??
+        shareCopy[language].unnamed
     );
 }
 
-function formatDate(date: string): string {
-    return new Intl.DateTimeFormat('es-ES', {
+function formatDate(date: string, language: ShareLanguage): string {
+    return new Intl.DateTimeFormat(language === 'es' ? 'es-ES' : 'en-US', {
         day: 'numeric',
         month: 'short',
     })
@@ -19,27 +53,31 @@ export function formatScheduleForSharing(
     session: Session,
     participants: Participant[],
     schedule: Schedule,
+    language: ShareLanguage = 'es',
 ): string {
+    const copy = shareCopy[language];
+    const month = formatMonth(session.month, language === 'es' ? 'es-ES' : 'en-US');
     const lines = [
-        `Guardias de ${formatMonth(session.month)}`,
-        `Propuesta ${schedule.attempt} · Xeirate`,
+        copy.shiftsFor.replace('{month}', month),
+        copy.proposal.replace('{attempt}', String(schedule.attempt)),
         '',
     ];
 
     for (const assignment of schedule.assignments) {
         lines.push(
-            `${formatDate(assignment.date)}: ${participantAlias(participants, assignment.participantId)}`,
+            `${formatDate(assignment.date, language)}: ${participantAlias(participants, assignment.participantId, language)}`,
         );
     }
 
     if (schedule.issues.length > 0) {
-        lines.push('', 'Revisar antes de compartir como definitivo:');
+        lines.push('', copy.review);
         for (const item of schedule.issues) {
-            const date = item.date ? ` (${formatDate(item.date)})` : '';
+            const date = item.date ? ` (${formatDate(item.date, language)})` : '';
             const alias = item.participantId
-                ? ` · ${participantAlias(participants, item.participantId)}`
+                ? ` · ${participantAlias(participants, item.participantId, language)}`
                 : '';
-            lines.push(`- ${item.message}${date}${alias}`);
+            const issueMessage = language === 'es' ? item.message : copy.issue[item.kind];
+            lines.push(`- ${issueMessage}${date}${alias}`);
         }
     }
 

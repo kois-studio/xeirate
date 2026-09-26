@@ -1,6 +1,6 @@
 import {
-    getDaysInMonth,
     type Condition,
+    getDaysInMonth,
     type Participant,
     type Schedule,
     type ScheduleIssue,
@@ -26,8 +26,11 @@ function dateForDay(month: string, day: number): string {
 }
 
 function conditionApplies(condition: Condition, date: string): boolean {
-    if (condition.weekday !== null && new Date(`${date}T12:00:00`).getDay() !== condition.weekday) {
-        return false;
+    if (condition.weekdays !== null) {
+        const weekday = new Date(`${date}T12:00:00`).getDay();
+        if (!condition.weekdays.includes(weekday)) {
+            return false;
+        }
     }
 
     return (

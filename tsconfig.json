@@ -1,11 +1,27 @@
 {
-    "extends": "astro/tsconfigs/strictest",
-    "include": [".astro/types.d.ts", "**/*"],
-    "exclude": ["dist"],
+    "include": [],
+    "exclude": ["dist", "node_modules"],
     "compilerOptions": {
+        "target": "ES2022",
+        "module": "ES2022",
+        "moduleResolution": "bundler",
+        "lib": ["ES2022", "DOM", "DOM.Iterable"],
+        "useDefineForClassFields": true,
+        "strict": true,
+        "noUncheckedIndexedAccess": true,
         "noPropertyAccessFromIndexSignature": true,
-        "types": ["bun-types"],
-        "jsx": "react-jsx",
-        "jsxImportSource": "preact"
+        "noImplicitOverride": true,
+        "noImplicitReturns": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true,
+        "skipLibCheck": true,
+        "experimentalDecorators": true,
+        "types": ["bun-types"]
+    },
+    "angularCompilerOptions": {
+        "strictTemplates": true,
+        "strictInjectionParameters": true,
+        "strictInputAccessModifiers": true
     }
 }

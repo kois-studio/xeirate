@@ -1,0 +1,13 @@
+<button
+    [attr.aria-current]="ariaCurrent()"
+    [attr.aria-label]="ariaLabel()"
+    [attr.aria-pressed]="ariaPressed()"
+    [class]="buttonClass() + ' focus-visible:outline-3 focus-visible:outline-[#e4ff69] focus-visible:outline-offset-3 motion-reduce:transition-none active:scale-105'"
+    [disabled]="disabled()"
+    type="button"
+    [attr.type]="type()"
+    (click)="emitClick($event)"
+>
+    <ng-content />
+</button>
+

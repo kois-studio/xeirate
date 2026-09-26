@@ -1,0 +1,49 @@
+<section class="grid gap-5" aria-labelledby="people-title">
+    <div class="grid grid-cols-[minmax(0,1fr)_minmax(20rem,0.75fr)] items-end gap-8 max-[760px]:grid-cols-1 max-[760px]:gap-4 print:hidden">
+        <div>
+            <p class="mb-3 text-[0.67rem] font-medium tracking-[0.13em] text-[#49616a] uppercase">{{ 'people.kicker' | t }}</p>
+            <h2 id="people-title" class="mb-2 font-serif text-[clamp(2rem,5vw,3rem)] leading-[0.95] tracking-[-0.075em]">{{ 'people.title' | t }}</h2>
+            <p class="m-0 max-w-[38rem] text-[0.87rem] leading-[1.55] text-[#49616a]">{{ 'people.intro' | t }}</p>
+        </div>
+        <form class="border-t-[0.3rem] border-[#e4ff69] bg-[#f0f8be] p-4" [formGroup]="form" (ngSubmit)="addParticipant()">
+            <label class="mb-2 block text-[0.73rem] font-medium" for="participant-alias">{{ 'people.addLabel' | t }}</label>
+            <div class="flex flex-col items-stretch gap-2.5 sm:flex-row">
+                <input class="min-h-11 min-w-0 flex-1 rounded border border-[#aebdb4] bg-[#fffdf8] px-3 py-2.5 text-[#162b36] outline-none placeholder:text-[#8da09a] focus-visible:outline-3 focus-visible:outline-[#e4ff69] focus-visible:outline-offset-3" id="participant-alias" formControlName="alias" [placeholder]="'people.aliasPlaceholder' | t" maxlength="40" autocomplete="off" />
+                <app-button buttonClass="inline-flex min-h-11 items-center justify-center gap-2 rounded-[0.4rem] bg-[#162b36] px-4 py-2.5 text-sm font-medium text-white transition-transform duration-150 hover:-translate-y-px hover:bg-[#24424e] active:scale-105" type="submit"><span aria-hidden="true">+</span> {{ 'people.add' | t }}</app-button>
+            </div>
+        </form>
+    </div>
+
+    @if (workspace().participants.length > 0) {
+        <div class="grid gap-3">
+            @for (participant of workspace().participants; track participant.id) {
+                <article class="border border-l-4 border-[#d8dfd9] border-l-[#e4f0f1] bg-[#fffdf8] p-4">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex min-w-0 items-center gap-2.5">
+                            <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-[#aebdb4] bg-[#e4f0f1] text-xs font-medium" aria-hidden="true">{{ participant.alias.slice(0, 1).toUpperCase() }}</span>
+                            <div class="grid gap-1">
+                                <h3 class="m-0 font-serif text-base tracking-[-0.04em]">{{ participant.alias }}</h3>
+                                <span class="text-[0.67rem] text-[#49616a]">{{ store.fixedConditions(participant.id).length === 0 ? ('people.noFixedConditions' | t) : ('people.fixedConditionCount.other' | t:{ count: store.fixedConditions(participant.id).length }) }}</span>
+                            </div>
+                        </div>
+                        <app-button [ariaLabel]="'people.delete' | t:{ name: participant.alias }" buttonClass="grid h-7 w-7 shrink-0 place-items-center rounded text-[#49616a] transition-transform duration-150 hover:bg-[#d8dfd9] hover:text-[#162b36] active:scale-105" (buttonClick)="store.removeParticipant(participant.id)"><span aria-hidden="true">×</span></app-button>
+                    </div>
+                    @if (store.fixedConditions(participant.id).length > 0) {
+                        <ul class="mt-4 grid gap-2" [attr.aria-label]="'people.conditionsFor' | t:{ name: participant.alias }">
+                            @for (condition of store.fixedConditions(participant.id); track condition.id) {
+                                <app-condition-row [condition]="condition" />
+                            }
+                        </ul>
+                    }
+                    <app-button buttonClass="mt-3 w-full rounded border border-dashed border-[#aebdb4] px-2.5 py-2.5 text-[0.7rem] font-medium text-[#162b36] transition-transform duration-150 hover:border-[#162b36] hover:bg-[#f4f3ed] active:scale-105" (buttonClick)="store.openConditionEditor(participant.id, 'fixed')"><span aria-hidden="true">+</span> {{ 'people.addFixedCondition' | t }}</app-button>
+                </article>
+            }
+        </div>
+    } @else {
+        <div class="flex min-h-56 flex-col items-center justify-center gap-2 rounded border border-[#d8dfd9] bg-[#fffdf8] text-center text-sm text-[#49616a]">
+            <span class="grid h-14 w-14 place-items-center border border-[#aebdb4] bg-[#e4ff69] text-2xl text-[#162b36]" aria-hidden="true">✦</span>
+            <strong class="text-base text-[#162b36]">{{ 'people.emptyTitle' | t }}</strong>
+            <span>{{ 'people.emptyBody' | t }}</span>
+        </div>
+    }
+</section>

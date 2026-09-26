@@ -1,7 +1,6 @@
 import { describe, expect, test } from 'bun:test';
-
-import { formatScheduleForSharing } from './export';
 import { createSession } from './domain';
+import { formatScheduleForSharing } from './export';
 
 describe('formatScheduleForSharing', () => {
     test('creates a readable Spanish share text with review notes', () => {

@@ -3,11 +3,13 @@ import {
     legacyStorageEnvelopeSchema,
     legacyStorageEnvelopeV2Schema,
     legacyStorageEnvelopeV3Schema,
+    legacyStorageEnvelopeV4Schema,
     migrateLegacyWorkspace,
-    migrateSchemaTwoWorkspace,
+    migrateSchemaFourWorkspace,
     migrateSchemaThreeWorkspace,
-    storageEnvelopeSchema,
+    migrateSchemaTwoWorkspace,
     type StorageEnvelope,
+    storageEnvelopeSchema,
     type Workspace,
 } from './domain';
 
@@ -52,6 +54,14 @@ export function loadWorkspace(storage: StorageLike | undefined): LoadResult {
             return { status: 'loaded', workspace: currentResult.data.workspace };
         }
 
+        const schemaFourResult = legacyStorageEnvelopeV4Schema.safeParse(parsed);
+        if (schemaFourResult.success) {
+            return {
+                status: 'migrated',
+                workspace: migrateSchemaFourWorkspace(schemaFourResult.data.workspace),
+            };
+        }
+
         const schemaThreeResult = legacyStorageEnvelopeV3Schema.safeParse(parsed);
         if (schemaThreeResult.success) {
             return {
@@ -94,7 +104,7 @@ export function saveWorkspace(
     }
 
     const envelope: StorageEnvelope = {
-        schemaVersion: 4,
+        schemaVersion: 5,
         updatedAt,
         workspace,
     };

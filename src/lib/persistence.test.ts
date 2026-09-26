@@ -2,12 +2,12 @@ import { describe, expect, test } from 'bun:test';
 
 import { emptyWorkspace } from './domain';
 import {
-    LEGACY_STORAGE_KEY,
-    STORAGE_KEY,
     clearWorkspace,
+    LEGACY_STORAGE_KEY,
     loadWorkspace,
-    saveWorkspace,
+    STORAGE_KEY,
     type StorageLike,
+    saveWorkspace,
 } from './persistence';
 
 function createMemoryStorage(initialValue?: string): StorageLike & { value: string | null } {
@@ -184,8 +184,50 @@ describe('workspace persistence', () => {
         const result = loadWorkspace(schemaThree);
 
         expect(result.status).toBe('migrated');
-        expect(result.workspace.conditions[0]?.weekday).toBeNull();
+        expect(result.workspace.conditions[0]?.weekdays).toBeNull();
         expect(result.workspace.conditions[0]?.sessionId).toBe('session-1');
+    });
+
+    test('migrates schema four weekday conditions into weekday selections', () => {
+        const schemaFour = createMemoryStorage(
+            JSON.stringify({
+                schemaVersion: 4,
+                updatedAt: '2026-09-19T10:00:00.000Z',
+                workspace: {
+                    participants: [{ id: 'person-1', alias: 'Lúa' }],
+                    sessions: [
+                        {
+                            id: 'session-1',
+                            month: '2026-11',
+                            participantIds: ['person-1'],
+                            createdAt: '2026-09-19T10:00:00.000Z',
+                            schedule: null,
+                        },
+                    ],
+                    activeSessionId: 'session-1',
+                    conditions: [
+                        {
+                            id: 'condition-1',
+                            sessionId: null,
+                            participantId: 'person-1',
+                            kind: 'restriction',
+                            preferenceMode: null,
+                            startDate: null,
+                            endDate: null,
+                            weekday: 2,
+                            note: 'No trabaja los martes.',
+                            reusable: true,
+                            createdAt: '2026-09-19T10:00:00.000Z',
+                        },
+                    ],
+                },
+            }),
+        );
+
+        const result = loadWorkspace(schemaFour);
+
+        expect(result.status).toBe('migrated');
+        expect(result.workspace.conditions[0]?.weekdays).toEqual([2]);
     });
 
     test('clears the local workspace through the storage boundary', () => {

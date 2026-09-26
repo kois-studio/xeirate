@@ -28,6 +28,20 @@ const conditionSchemaV3 = z.object({
     createdAt: z.iso.datetime(),
 });
 
+const conditionSchemaV4 = z.object({
+    id: identifierSchema,
+    sessionId: identifierSchema.nullable(),
+    participantId: identifierSchema,
+    kind: z.enum(['restriction', 'preference', 'clarification']),
+    preferenceMode: z.enum(['avoid', 'prefer']).nullable(),
+    startDate: dateSchema.nullable(),
+    endDate: dateSchema.nullable(),
+    weekday: z.number().int().min(0).max(6).nullable(),
+    note: z.string().trim().min(1).max(180),
+    reusable: z.boolean(),
+    createdAt: z.iso.datetime(),
+});
+
 export const scheduleAssignmentSchema = z.object({
     date: dateSchema,
     participantId: identifierSchema,
@@ -69,7 +83,7 @@ export const conditionSchema = z
         preferenceMode: z.enum(['avoid', 'prefer']).nullable(),
         startDate: dateSchema.nullable(),
         endDate: dateSchema.nullable(),
-        weekday: z.number().int().min(0).max(6).nullable(),
+        weekdays: z.array(z.number().int().min(0).max(6)).max(7).nullable(),
         note: z.string().trim().min(1).max(180),
         reusable: z.boolean(),
         createdAt: z.iso.datetime(),
@@ -94,6 +108,16 @@ export const conditionSchema = z
                 code: 'custom',
                 path: ['preferenceMode'],
                 message: 'Only preferences can have a preference mode.',
+            });
+        }
+        if (
+            condition.weekdays !== null &&
+            new Set(condition.weekdays).size !== condition.weekdays.length
+        ) {
+            context.addIssue({
+                code: 'custom',
+                path: ['weekdays'],
+                message: 'Weekday selections must be unique.',
             });
         }
     });
@@ -127,13 +151,20 @@ const sessionWorkspaceSchemaV3 = z.object({
     conditions: z.array(conditionSchemaV3).max(1000),
 });
 
+const sessionWorkspaceSchemaV4 = z.object({
+    participants: z.array(participantSchema).max(100),
+    sessions: z.array(sessionSchema).max(24),
+    activeSessionId: identifierSchema.nullable(),
+    conditions: z.array(conditionSchemaV4).max(1000),
+});
+
 export const workspaceSchema = sessionWorkspaceSchemaV1.extend({
     sessions: z.array(sessionSchema).max(24),
     conditions: z.array(conditionSchema).max(1000),
 });
 
 export const storageEnvelopeSchema = z.object({
-    schemaVersion: z.literal(4),
+    schemaVersion: z.literal(5),
     updatedAt: z.iso.datetime(),
     workspace: workspaceSchema,
 });
@@ -154,6 +185,12 @@ export const legacyStorageEnvelopeV3Schema = z.object({
     schemaVersion: z.literal(3),
     updatedAt: z.iso.datetime(),
     workspace: sessionWorkspaceSchemaV3,
+});
+
+export const legacyStorageEnvelopeV4Schema = z.object({
+    schemaVersion: z.literal(4),
+    updatedAt: z.iso.datetime(),
+    workspace: sessionWorkspaceSchemaV4,
 });
 
 export type Participant = z.infer<typeof participantSchema>;
@@ -191,18 +228,32 @@ export function createCondition(input: Condition): Condition {
     return conditionSchema.parse(input);
 }
 
+const allWeekdays = [0, 1, 2, 3, 4, 5, 6];
+
 function migrateCondition(condition: z.infer<typeof legacyConditionSchema>): Condition {
     return {
         ...condition,
         preferenceMode: condition.kind === 'preference' ? 'avoid' : null,
-        weekday: null,
+        weekdays: condition.reusable ? [...allWeekdays] : null,
     };
 }
 
 function migrateSchemaThreeCondition(condition: z.infer<typeof conditionSchemaV3>): Condition {
     return {
         ...condition,
-        weekday: null,
+        weekdays: condition.reusable ? [...allWeekdays] : null,
+    };
+}
+
+function migrateSchemaFourCondition(condition: z.infer<typeof conditionSchemaV4>): Condition {
+    return {
+        ...condition,
+        weekdays:
+            condition.weekday === null
+                ? condition.reusable
+                    ? [...allWeekdays]
+                    : null
+                : [condition.weekday],
     };
 }
 
@@ -241,6 +292,15 @@ export function migrateSchemaThreeWorkspace(
     };
 }
 
+export function migrateSchemaFourWorkspace(
+    workspace: z.infer<typeof sessionWorkspaceSchemaV4>,
+): Workspace {
+    return {
+        ...workspace,
+        conditions: workspace.conditions.map(migrateSchemaFourCondition),
+    };
+}
+
 export function getDaysInMonth(month: string): number {
     const match = /^(\d{4})-(\d{2})$/.exec(month);
     if (!match) {
@@ -256,13 +316,13 @@ export function getDaysInMonth(month: string): number {
     return new Date(year, monthNumber, 0).getDate();
 }
 
-export function formatMonth(month: string): string {
+export function formatMonth(month: string, locale = 'es-ES'): string {
     const date = new Date(`${month}-01T12:00:00`);
     if (Number.isNaN(date.getTime())) {
         return month;
     }
 
-    return new Intl.DateTimeFormat('es-ES', {
+    return new Intl.DateTimeFormat(locale, {
         month: 'long',
         year: 'numeric',
     }).format(date);

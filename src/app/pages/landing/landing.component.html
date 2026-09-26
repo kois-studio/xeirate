@@ -1,0 +1,57 @@
+<app-site-header />
+
+<main class="mx-auto w-[min(100%,1120px)]">
+    <section class="relative grid min-h-[38rem] items-center border-b border-[#d8dfd9] py-16 pb-20 max-[760px]:min-h-[32rem] max-[760px]:py-12 max-[760px]:pb-16" aria-labelledby="page-title">
+        <div class="relative z-[1] max-w-[43rem]">
+            <p class="mb-4 text-[0.67rem] font-medium tracking-[0.13em] text-[#49616a] uppercase"><span aria-hidden="true">✦</span> {{ 'landing.eyebrow' | t }}</p>
+            <h1 id="page-title" class="mb-5 max-w-[760px] font-serif text-[clamp(3.4rem,9vw,7rem)] leading-[0.9] tracking-[-0.085em]">{{ 'landing.title' | t }}</h1>
+            <p class="mb-7 max-w-[35rem] text-[1.05rem] leading-[1.65] text-[#49616a]">{{ 'landing.intro' | t }}</p>
+            <div class="flex flex-wrap items-center gap-4">
+                <a class="inline-flex min-h-11 items-center justify-center gap-2 rounded-[0.4rem] bg-[#162b36] px-4 py-2.5 text-sm font-medium text-white no-underline transition-transform duration-150 hover:-translate-y-px hover:bg-[#24424e] active:scale-105" href="/app" [routerLink]="languageService.localizedUrl('/app', languageService.language())">{{ 'landing.prepareSession' | t }} <span aria-hidden="true">→</span></a>
+                <a class="font-medium text-[#162b36] underline underline-offset-4" href="#como-funciona">{{ 'landing.seeHow' | t }}</a>
+            </div>
+        </div>
+        <div class="pointer-events-none absolute top-1/2 right-16 h-68 w-68 -translate-y-1/2 rotate-[18deg] rounded-full border border-[#162b36]/25 max-[760px]:top-[28%] max-[760px]:right-[-2rem] max-[760px]:h-40 max-[760px]:w-40 max-[760px]:opacity-70" aria-hidden="true">
+            <span class="absolute inset-9 rounded-full border border-dashed border-[#162b36]/20 max-[760px]:inset-5"></span>
+            <span class="absolute top-1/2 left-1/2 h-[4.6rem] w-[4.6rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#e4ff69] shadow-[0_0_0_0.7rem_rgba(228,255,105,0.22)] max-[760px]:h-11 max-[760px]:w-11"></span>
+            <span class="absolute top-5 right-8 h-3 w-3 rounded-full bg-[#ffd8c2]"></span>
+            <span class="absolute bottom-6 left-5 h-3 w-3 rounded-full bg-[#fff0b3]"></span>
+            <span class="absolute right-9 bottom-4 h-2 w-2 rounded-full bg-[#e4f0f1]"></span>
+            <span class="absolute top-1/2 left-1/2 grid h-13 w-13 -translate-x-1/2 -translate-y-1/2 -rotate-[18deg] place-items-center text-xl text-[#162b36]">✦</span>
+        </div>
+    </section>
+
+    <section id="como-funciona" class="py-20 pb-16" aria-labelledby="how-title">
+        <div class="mx-auto mb-8 max-w-[42rem] text-center">
+            <p class="mb-3 text-[0.67rem] font-medium tracking-[0.13em] text-[#49616a] uppercase">{{ 'landing.sectionEyebrow' | t }}</p>
+            <h2 id="how-title" class="font-serif text-[clamp(2rem,5vw,3.3rem)] leading-[0.98] tracking-[-0.07em]">{{ 'landing.sectionTitle' | t }}</h2>
+        </div>
+        <div class="grid grid-cols-3 gap-3 max-[760px]:grid-cols-1">
+            <article class="min-h-60 border border-[#d8dfd9] border-t-[0.35rem] border-t-[#162b36] bg-[#fffdf8] p-5 max-[760px]:min-h-0">
+                <span class="mb-14 inline-block text-[0.67rem] font-medium tracking-[0.12em] text-[#49616a]">01</span>
+                <h3 class="mb-2 font-serif text-[1.4rem] tracking-[-0.05em]">{{ 'landing.peopleTitle' | t }}</h3>
+                <p class="text-[0.82rem] leading-[1.55] text-[#49616a]">{{ 'landing.peopleBody' | t }}</p>
+            </article>
+            <article class="min-h-60 border border-[#d8dfd9] border-t-[0.35rem] border-t-[#e4ff69] bg-[#f0f8be] p-5 max-[760px]:min-h-0">
+                <span class="mb-14 inline-block text-[0.67rem] font-medium tracking-[0.12em] text-[#49616a]">02</span>
+                <h3 class="mb-2 font-serif text-[1.4rem] tracking-[-0.05em]">{{ 'landing.sessionsTitle' | t }}</h3>
+                <p class="text-[0.82rem] leading-[1.55] text-[#49616a]">{{ 'landing.sessionsBody' | t }}</p>
+            </article>
+            <article class="min-h-60 border border-[#d8dfd9] border-t-[0.35rem] border-t-[#ffd8c2] bg-[#e4f0f1] p-5 max-[760px]:min-h-0">
+                <span class="mb-14 inline-block text-[0.67rem] font-medium tracking-[0.12em] text-[#49616a]">03</span>
+                <h3 class="mb-2 font-serif text-[1.4rem] tracking-[-0.05em]">{{ 'landing.proposalsTitle' | t }}</h3>
+                <p class="text-[0.82rem] leading-[1.55] text-[#49616a]">{{ 'landing.proposalsBody' | t }}</p>
+            </article>
+        </div>
+    </section>
+
+    <section class="mx-auto mb-20 flex max-w-[35rem] items-start gap-3 border-l-[0.35rem] border-[#e4ff69] bg-[#fffdf8] p-4" [attr.aria-label]="'landing.privacyLabel' | t">
+        <div class="grid h-7 w-7 shrink-0 place-items-center bg-[#e4ff69] text-[#162b36]" aria-hidden="true">●</div>
+        <div>
+            <strong class="mb-1 block text-sm">{{ 'landing.privacyHeadline' | t }}</strong>
+            <p class="m-0 text-[0.82rem] leading-[1.55] text-[#49616a]">{{ 'landing.privacyBody' | t }}</p>
+        </div>
+    </section>
+</main>
+
+<app-site-footer />

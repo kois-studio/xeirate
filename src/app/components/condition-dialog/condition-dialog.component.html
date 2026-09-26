@@ -1,0 +1,60 @@
+<div class="fixed inset-0 z-10 grid overflow-y-auto place-items-center bg-[#162b36]/55 p-4" (keydown.escape)="store.closeConditionEditor()">
+    <section class="max-h-[calc(100vh-2rem)] w-[min(100%,35rem)] overflow-y-auto border border-[#162b36] bg-[#fffdf8] p-5 shadow-[0_22px_70px_rgba(22,43,54,0.25)]" role="dialog" aria-modal="true" aria-labelledby="condition-dialog-title" tabindex="-1">
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <p class="mb-3 text-[0.67rem] font-medium tracking-[0.13em] text-[#49616a] uppercase">{{ isFixed() ? ('condition.person' | t) : ('condition.session' | t) }}</p>
+                <h2 id="condition-dialog-title" class="m-0 font-serif text-3xl leading-[0.95] tracking-[-0.07em]">{{ editor()?.conditionId ? ('condition.edit' | t) : ('condition.translate' | t) }}</h2>
+            </div>
+            <app-button [ariaLabel]="'condition.close' | t" buttonClass="grid h-7 w-7 shrink-0 place-items-center rounded text-xl text-[#49616a] transition-transform duration-150 hover:bg-[#d8dfd9] hover:text-[#162b36] active:scale-105" (buttonClick)="store.closeConditionEditor()"><span aria-hidden="true">×</span></app-button>
+        </div>
+        <p class="my-3 mb-4 text-[0.8rem] leading-[1.45] text-[#49616a]">{{ 'condition.dialogIntro' | t }}</p>
+
+        <form class="grid gap-4" [formGroup]="form" (ngSubmit)="save()">
+            <fieldset class="border-l-4 border-[#e4ff69] bg-[#f0f8be] p-3">
+                <legend class="mb-2 text-[0.73rem] font-medium text-[#162b36]">{{ 'condition.type' | t }}</legend>
+                <div class="grid grid-cols-2 gap-1.5">
+                    <app-button [ariaPressed]="form.controls.kind.value === 'restriction'" [buttonClass]="'min-h-10 rounded border px-3 py-2 text-sm font-medium transition-transform duration-150 active:scale-105 ' + (form.controls.kind.value === 'restriction' ? 'border-[#162b36] bg-[#e4ff69] text-[#162b36]' : 'border-[#aebdb4] bg-[#fffdf8] text-[#49616a]')" (buttonClick)="form.controls.kind.setValue('restriction')">{{ 'condition.requirement' | t }}</app-button>
+                    <app-button [ariaPressed]="form.controls.kind.value === 'preference'" [buttonClass]="'min-h-10 rounded border px-3 py-2 text-sm font-medium transition-transform duration-150 active:scale-105 ' + (form.controls.kind.value === 'preference' ? 'border-[#162b36] bg-[#e4ff69] text-[#162b36]' : 'border-[#aebdb4] bg-[#fffdf8] text-[#49616a]')" (buttonClick)="form.controls.kind.setValue('preference')">{{ 'condition.preference' | t }}</app-button>
+                </div>
+                <p class="mt-2 mb-0 text-[0.7rem] leading-[1.4] text-[#49616a]">{{ form.controls.kind.value === 'restriction' ? ('condition.requirementHelp' | t) : ('condition.preferenceHelp' | t) }}</p>
+            </fieldset>
+
+            @if (form.controls.kind.value === 'preference') {
+                <div><label class="mb-2 block text-[0.73rem] font-medium" for="dialog-preference-mode">{{ 'condition.howToApply' | t }}</label><select class="min-h-11 w-full rounded border border-[#aebdb4] bg-[#fffdf8] px-3 py-2.5 text-[#162b36] outline-none focus-visible:outline-3 focus-visible:outline-[#e4ff69] focus-visible:outline-offset-3" id="dialog-preference-mode" formControlName="preferenceMode"><option value="avoid">{{ 'condition.tryAvoid' | t }}</option><option value="prefer">{{ 'condition.tryAssign' | t }}</option></select></div>
+            }
+
+            @if (isFixed()) {
+                <fieldset class="border border-[#d8dfd9] bg-[#f4f3ed] p-3">
+                    <legend class="mb-2 text-[0.73rem] font-medium">{{ 'condition.whenApplies' | t }}</legend>
+                    <p class="mt-0 mb-3 text-[0.7rem] leading-[1.4] text-[#49616a]" id="dialog-weekdays-help">{{ 'condition.weekdayHelp' | t }}</p>
+                    <div class="grid grid-cols-7 gap-1.5" aria-describedby="dialog-weekdays-help">
+                        @for (weekday of weekdays; track weekday.value) {
+                            <app-button [ariaLabel]="weekdayLabel(weekday.value)" [ariaPressed]="form.controls.weekdays.value.includes(weekday.value)" [buttonClass]="'grid aspect-square min-h-9 w-full place-items-center rounded-full border p-1 text-sm font-medium transition-transform duration-150 active:scale-105 ' + (form.controls.weekdays.value.includes(weekday.value) ? 'border-[#162b36] bg-[#e4ff69] text-[#162b36]' : 'border-[#aebdb4] bg-[#fffdf8] text-[#49616a]')" (buttonClick)="toggleWeekday(weekday.value)">{{ weekday.shortLabel }}</app-button>
+                        }
+                    </div>
+                    <span class="mt-2 block text-[0.68rem] text-[#49616a]">{{ store.weekdaysSelectionLabel(form.controls.weekdays.value) }}</span>
+                </fieldset>
+            } @else {
+                <fieldset class="grid grid-cols-2 gap-2.5 max-[760px]:grid-cols-1">
+                    <legend class="col-span-full mb-[-0.1rem] text-[0.73rem] font-medium">{{ 'condition.whenApplies' | t }}</legend>
+                    <div><label class="mb-2 block text-[0.73rem] font-medium" for="dialog-condition-start">{{ 'condition.fromOptional' | t }}</label><input class="min-h-11 w-full rounded border border-[#aebdb4] bg-[#fffdf8] px-3 py-2.5 text-[#162b36] outline-none focus-visible:outline-3 focus-visible:outline-[#e4ff69] focus-visible:outline-offset-3" id="dialog-condition-start" formControlName="startDate" type="date" [min]="activeSession() ? activeSession()!.month + '-01' : null" [max]="activeSession() ? store.lastDateOfMonth(activeSession()!.month) : null" /></div>
+                    <div><label class="mb-2 block text-[0.73rem] font-medium" for="dialog-condition-end">{{ 'condition.untilOptional' | t }}</label><input class="min-h-11 w-full rounded border border-[#aebdb4] bg-[#fffdf8] px-3 py-2.5 text-[#162b36] outline-none focus-visible:outline-3 focus-visible:outline-[#e4ff69] focus-visible:outline-offset-3" id="dialog-condition-end" formControlName="endDate" type="date" [min]="activeSession() ? activeSession()!.month + '-01' : null" [max]="activeSession() ? store.lastDateOfMonth(activeSession()!.month) : null" /></div>
+                </fieldset>
+            }
+
+            <div><label class="mb-1 block text-[0.73rem] font-medium" for="dialog-condition-note">{{ 'condition.requested' | t }}</label><p class="mt-0 mb-2 text-[0.7rem] leading-[1.4] text-[#49616a]" id="dialog-condition-note-help">{{ 'condition.requestedHelp' | t }}</p><textarea class="min-h-28 w-full resize-y rounded border border-[#aebdb4] bg-[#fffdf8] px-3 py-2.5 text-[#162b36] outline-none placeholder:text-[#8da09a] focus-visible:outline-3 focus-visible:outline-[#e4ff69] focus-visible:outline-offset-3" id="dialog-condition-note" formControlName="note" rows="4" maxlength="180" [placeholder]="'condition.notePlaceholder' | t" aria-describedby="dialog-condition-note-help"></textarea></div>
+
+            <div class="flex items-center justify-between gap-3 pt-1 max-[560px]:flex-col max-[560px]:items-stretch">
+                @if (editor()?.conditionId) {
+                    <app-button buttonClass="inline-flex min-h-11 items-center justify-center rounded-[0.4rem] bg-[#ffd8c2] px-4 py-2.5 text-sm font-medium text-[#8e4938] transition-transform duration-150 active:scale-105" (buttonClick)="remove()">{{ 'condition.delete' | t }}</app-button>
+                } @else {
+                    <span></span>
+                }
+                <div class="flex gap-2 max-[560px]:flex-col">
+                    <app-button buttonClass="inline-flex min-h-11 items-center justify-center rounded-[0.4rem] border border-[#aebdb4] px-4 py-2.5 text-sm font-medium text-[#162b36] transition-transform duration-150 hover:bg-[#fffdf8] active:scale-105" (buttonClick)="store.closeConditionEditor()">{{ 'condition.cancel' | t }}</app-button>
+                    <app-button buttonClass="inline-flex min-h-11 items-center justify-center rounded-[0.4rem] bg-[#162b36] px-4 py-2.5 text-sm font-medium text-white transition-transform duration-150 hover:-translate-y-px hover:bg-[#24424e] active:scale-105" type="submit">{{ 'condition.save' | t }}</app-button>
+                </div>
+            </div>
+        </form>
+    </section>
+</div>

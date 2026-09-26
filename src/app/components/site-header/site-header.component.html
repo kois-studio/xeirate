@@ -1,0 +1,20 @@
+<header class="mx-auto flex w-[min(100%-2rem,1120px)] items-center justify-between gap-4 py-5 max-[760px]:w-[min(100%-1.25rem,1120px)] print:hidden">
+    <a class="inline-flex items-center text-[#162b36] no-underline" href="/" [routerLink]="languageService.localizedUrl('/', languageService.language())" [attr.aria-label]="'nav.home' | t">
+        <img class="block h-auto w-[clamp(8.4rem,22vw,10rem)]" src="logo.svg" alt="Xeirate" width="320" height="72" />
+    </a>
+    <div class="flex items-center gap-3">
+        @if (workspace()) {
+            <a class="rounded-[0.35rem] border border-[#d8dfd9] bg-[#fffdf8]/70 px-3 py-2 text-[0.67rem] font-medium tracking-[0.13em] text-[#49616a] uppercase no-underline transition-transform duration-150 hover:border-[#aebdb4] hover:text-[#162b36] active:scale-105" href="/#como-funciona" [routerLink]="languageService.localizedUrl('/#como-funciona', languageService.language())">
+                {{ 'nav.howItWorks' | t }} <span class="text-[#162b36]" aria-hidden="true">↗</span>
+            </a>
+        } @else {
+            <a class="inline-flex min-h-11 items-center justify-center gap-2 rounded-[0.4rem] bg-[#162b36] px-4 py-2.5 text-sm font-medium text-white no-underline transition-transform duration-150 hover:-translate-y-px hover:bg-[#24424e] active:scale-105" href="/app" [routerLink]="languageService.localizedUrl('/app', languageService.language())">
+                {{ 'nav.openApp' | t }} <span aria-hidden="true">→</span>
+            </a>
+        }
+        <fieldset class="flex items-center gap-1 rounded border border-[#d8dfd9] bg-[#fffdf8]/70 p-1" [attr.aria-label]="'language.switchTo' | t:{ language: languageService.language() === 'en' ? ('language.spanish' | t) : ('language.english' | t) }">
+            <app-button [ariaLabel]="'language.english' | t" [ariaPressed]="languageService.language() === 'en'" buttonClass="rounded px-2 py-1 text-[0.62rem] font-medium text-[#49616a] transition-colors hover:bg-[#e4f0f1]" (buttonClick)="selectLanguage('en')">EN</app-button>
+            <app-button [ariaLabel]="'language.spanish' | t" [ariaPressed]="languageService.language() === 'es'" buttonClass="rounded px-2 py-1 text-[0.62rem] font-medium text-[#49616a] transition-colors hover:bg-[#e4f0f1]" (buttonClick)="selectLanguage('es')">ES</app-button>
+        </fieldset>
+    </div>
+</header>

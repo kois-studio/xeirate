@@ -16,9 +16,9 @@ type StorageEnvelope = {
 };
 ```
 
-The current workspace contains participants, month sessions, provisional conditions, and the latest generated schedule. A condition has a person, an optional session scope, kind (`restriction`, `preference`, or `clarification`), optional `avoid`/`prefer` mode, optional date range, optional recurring weekday, a coordinator note, a reusable flag, and a creation timestamp. A `sessionId` of `null` means the condition belongs to the person and is reused by future sessions. Restrictions drive hard availability; preferences influence the heuristic; clarifications become review warnings. These semantics are intentionally provisional until the department rules are validated.
+The current workspace contains participants, month sessions, provisional conditions, and the latest generated schedule. A condition has a person, an optional session scope, kind (`restriction`, `preference`, or legacy `clarification`), optional `avoid`/`prefer` mode, optional date range, optional selected recurring weekdays, a coordinator note, a reusable flag, and a creation timestamp. A `sessionId` of `null` means the condition belongs to the person and is reused by future sessions. Restrictions drive hard availability; preferences influence the heuristic; clarifications become review warnings. The editor exposes only requirement or preference for new and edited conditions. These semantics are intentionally provisional until the department rules are validated.
 
-The current envelope is `schemaVersion: 4` stored under `xeirate.workspace`. Runtime validation is required when reading localStorage. Invalid or unsupported data must be rejected safely, with a recoverable reset path and no silent corruption.
+The current envelope is `schemaVersion: 5` stored under `xeirate.workspace`. Runtime validation is required when reading localStorage. Invalid or unsupported data must be rejected safely, with a recoverable reset path and no silent corruption.
 
 ## Lifecycle
 
@@ -27,7 +27,7 @@ The current envelope is `schemaVersion: 4` stored under `xeirate.workspace`. Run
 - Update: after accepted user actions, using a deterministic serialization path.
 - Delete/reset: through an explicit user action that clearly states the local scope.
 - Export: creates a user-controlled file or rendered artifact; it does not upload data.
-- Migration: the implemented v1-to-v4 migration adds conditions and empty schedules; the v2-to-v4 migration adds empty schedules and defaults legacy preferences to `avoid`; and the v3-to-v4 migration adds the fixed-condition weekday field. No migration loses existing participants or sessions. Future schema versions need named migration functions and tests before release.
+- Migration: the implemented v1-to-v5 migration adds conditions and empty schedules; the v2-to-v5 migration adds empty schedules and defaults legacy preferences to `avoid`; the v3-to-v5 migration adds the fixed-condition model; and the v4-to-v5 migration converts the single `weekday` field into selected `weekdays`. No migration loses existing participants or sessions. Future schema versions need named migration functions and tests before release.
 
 ## Validation and safety
 

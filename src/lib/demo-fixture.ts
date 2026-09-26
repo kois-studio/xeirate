@@ -1,7 +1,8 @@
-import { createCondition, createSession, type Condition, type Workspace } from './domain';
+import { type Condition, createCondition, createSession, type Workspace } from './domain';
 
 const createdAt = '2026-09-19T10:00:00.000Z';
 const demoSessionId = 'demo-session-november';
+type DemoLanguage = 'en' | 'es';
 
 const demoParticipants = [
     { id: 'demo-nube', alias: 'Nube' },
@@ -16,19 +17,37 @@ const demoParticipants = [
 
 function demoCondition(
     input: Pick<Condition, 'id' | 'participantId' | 'kind' | 'startDate' | 'endDate' | 'note'> &
-        Partial<Pick<Condition, 'preferenceMode' | 'reusable' | 'weekday' | 'sessionId'>>,
+        Partial<Pick<Condition, 'preferenceMode' | 'reusable' | 'weekdays' | 'sessionId'>>,
 ): Condition {
     return createCondition({
         ...input,
         sessionId: input.sessionId ?? demoSessionId,
         preferenceMode: input.kind === 'preference' ? (input.preferenceMode ?? 'avoid') : null,
-        weekday: input.weekday ?? null,
+        weekdays: input.weekdays ?? null,
         reusable: input.reusable ?? false,
         createdAt,
     });
 }
 
-export function createDemoWorkspace(): Workspace {
+const englishDemoNotes: Record<string, string> = {
+    'demo-rio-fixed-tuesday': 'Fixed condition: does not work on Tuesdays.',
+    'demo-nube-course': 'Course outside the hospital on these days.',
+    'demo-nube-holiday': 'Holiday.',
+    'demo-brisa-preference': 'I would prefer to avoid these days.',
+    'demo-brisa-preference-two': 'I would prefer to avoid this weekend.',
+    'demo-lume-course': 'Course and training rotation.',
+    'demo-lume-break': 'It would help to leave 4–5 shifts open for holiday cover changes.',
+    'demo-alba-holiday': 'Holiday.',
+    'demo-alba-rotation': 'External rotation: do not assign from this date.',
+    'demo-senda-preference': 'I would prefer to avoid these first days.',
+    'demo-rio-block': 'Unavailable during this block.',
+    'demo-rio-area': 'Avoid a specific area: we still need to confirm how to represent areas.',
+    'demo-sol-unknown': 'Internal request pending translation.',
+    'demo-mar-preference': 'I would prefer to avoid these days.',
+    'demo-mar-course': 'Course: confirm whether these days should be blocked.',
+};
+
+export function createDemoWorkspace(language: DemoLanguage = 'es'): Workspace {
     const session = createSession({
         id: demoSessionId,
         month: '2026-11',
@@ -37,7 +56,7 @@ export function createDemoWorkspace(): Workspace {
         schedule: null,
     });
 
-    return {
+    const workspace: Workspace = {
         participants: demoParticipants,
         sessions: [session],
         activeSessionId: session.id,
@@ -47,7 +66,7 @@ export function createDemoWorkspace(): Workspace {
                 sessionId: null,
                 participantId: 'demo-rio',
                 kind: 'restriction',
-                weekday: 2,
+                weekdays: [2],
                 startDate: null,
                 endDate: null,
                 note: 'Condición fija: no trabaja los martes.',
@@ -171,4 +190,14 @@ export function createDemoWorkspace(): Workspace {
             }),
         ],
     };
+
+    return language === 'en'
+        ? {
+              ...workspace,
+              conditions: workspace.conditions.map((condition) => ({
+                  ...condition,
+                  note: englishDemoNotes[condition.id] ?? condition.note,
+              })),
+          }
+        : workspace;
 }

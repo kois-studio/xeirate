@@ -1,6 +1,7 @@
-# Astro build output
+# Build output and Angular cache
 /dist/
 /.astro/
+/.angular/
 
 # Dependencies
 /node_modules/

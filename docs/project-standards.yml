@@ -23,7 +23,7 @@ standards:
   - operations
 
 profiles:
-  - astro-website
+  - angular-application
 
 compliance:
   rules:
@@ -69,9 +69,9 @@ compliance:
       next_action: Establish an automated quality baseline before calling the project implementation-ready.
     - id: TS-001
       status: compliant
-      evidence: tsconfig.json, bun run typecheck
+      evidence: tsconfig.json, tsconfig.app.json, bun run typecheck
       priority: high
-      next_action: Enable strict compiler checks in the Astro scaffold.
+      next_action: Keep strict compiler and Angular template checks enabled as new features land.
     - id: TS-005
       status: compliant
       evidence: architecture/data-and-persistence.md
@@ -81,17 +81,17 @@ compliance:
       status: compliant
       evidence: tsconfig.json, biome.json, package.json
       priority: high
-      next_action: Add committed TypeScript, formatter, and linter configuration.
+      next_action: Keep committed TypeScript, Angular, formatter, and linter configuration aligned.
     - id: TS-009
       status: compliant
       evidence: tsconfig.json, bun run typecheck
       priority: medium
-      next_action: Enable checked indexed access options in the scaffold.
+      next_action: Keep checked indexed access options enabled in the Angular project.
     - id: TS-010
       status: compliant
       evidence: tsconfig.json, bun run typecheck
       priority: medium
-      next_action: Enable the required compiler quality checks.
+      next_action: Keep the required compiler quality checks enabled.
     - id: SEC-001
       status: partial
       evidence: docs/architecture/proposed-system.md and docs/architecture/data-and-persistence.md
@@ -169,59 +169,134 @@ compliance:
       next_action: Add migration tests for each future schema version.
     - id: STYLE-001
       status: compliant
-      evidence: src/styles/global.css, docs/architecture/proposed-system.md
+      evidence: src/styles.css, Angular templates under src/app/, docs/architecture/proposed-system.md
       priority: medium
-      next_action: Establish one primary styling system and document the choice.
+      next_action: Keep Tailwind as the only styling system and document any specialized CSS exception.
     - id: A11Y-001
-      status: partial
-      evidence: src/pages/index.astro, src/components/WorkspaceApp.tsx
+      status: compliant
+      evidence: Angular templates under src/app/, semantic form controls, dialog landmarks
       priority: high
-      next_action: Review semantic structure and landmarks in the first rendered slice.
+      next_action: Retain a rendered accessibility audit for the critical workflow.
     - id: A11Y-002
       status: partial
-      evidence: src/styles/global.css, src/components/WorkspaceApp.tsx
+      evidence: Angular button component, Tailwind focus-visible utilities, condition dialog escape handling
       priority: high
-      next_action: Verify keyboard flow and visible focus states before release.
+      next_action: Verify keyboard flow and visible focus states with a rendered browser audit.
     - id: A11Y-003
       status: partial
-      evidence: src/components/WorkspaceApp.tsx
+      evidence: Angular reactive forms, labels, aria-live workspace status, condition dialog labels
       priority: high
-      next_action: Associate labels, errors, and status messages with all controls.
+      next_action: Add retained assertions for labels, errors, and status messages.
     - id: A11Y-005
       status: partial
-      evidence: src/styles/global.css
+      evidence: Tailwind responsive utilities under src/app/
       priority: high
-      next_action: Check mobile layout, contrast, zoom, and reduced motion behavior.
+      next_action: Check mobile layout, contrast, zoom, and reduced motion behavior in a rendered audit.
     - id: WEB-001
       status: planned
       evidence: work/TODO.md
       priority: medium
       next_action: Add a rendered-page audit for the deployed static build.
+    - id: ANGULAR-001
+      status: compliant
+      evidence: src/app/, angular.json, docs/decisions/0007-angular-standalone-and-tailwind-migration.md
+      priority: high
+      next_action: Keep future features organized by Angular capability and domain boundary.
+    - id: ANGULAR-002
+      status: compliant
+      evidence: src/app/pages/, src/app/components/, src/app/services/workspace.service.ts, src/lib/
+      priority: medium
+      next_action: Keep domain and persistence code framework-independent.
+    - id: ANGULAR-003
+      status: compliant
+      evidence: strict TypeScript contracts, typed WorkspaceService, signal-based component APIs, reactive form models
+      priority: high
+      next_action: Keep component inputs, outputs, and store commands explicit.
+    - id: ANGULAR-004
+      status: compliant
+      evidence: src/app/components/condition-dialog/, src/app/components/people-view/, src/app/components/sessions-view/
+      priority: medium
+      next_action: Use reactive forms for future complex workflows.
+    - id: ANGULAR-005
+      status: compliant
+      evidence: package.json, src/styles.css, Angular templates under src/app/
+      priority: medium
+      next_action: Keep Tailwind utilities as the primary styling and interaction vocabulary.
+    - id: ANGULAR-006
+      status: compliant
+      evidence: src/lib/domain.ts Zod schemas, persistence loaders, form validation
+      priority: high
+      next_action: Validate every future import or external browser boundary before use.
+    - id: ANGULAR-007
+      status: compliant
+      evidence: src/app/services/workspace.service.ts signal ownership and commands
+      priority: high
+      next_action: Keep state transitions in the store or focused feature services.
+    - id: ANGULAR-008
+      status: compliant
+      evidence: src/lib/scheduler.ts and src/lib/*.test.ts
+      priority: medium
+      next_action: Preserve isolated deterministic tests for scheduling rules.
+    - id: ANGULAR-010
+      status: compliant
+      evidence: signal computed state and Angular effect in WorkspaceService
+      priority: high
+      next_action: Keep effects bounded to lifecycle-owned browser side effects.
+    - id: ANGULAR-011
+      status: planned
+      evidence: docs/work/TODO.md
+      priority: medium
+      next_action: Add a critical end-to-end browser journey.
+    - id: ANGULAR-012
+      status: compliant
+      evidence: tsconfig.json angularCompilerOptions, bun run typecheck
+      priority: high
+      next_action: Keep strictTemplates, strictInjectionParameters, and strictInputAccessModifiers enabled.
+    - id: ANGULAR-014
+      status: partial
+      evidence: workspace status messaging and empty states; localStorage has no remote loading state
+      priority: medium
+      next_action: Add explicit storage-unavailable/error presentation to the retained browser audit.
+    - id: ANGULAR-015
+      status: compliant
+      evidence: scoped WorkspaceService signals and route-level page components
+      priority: medium
+      next_action: Keep client state scoped to the workspace feature.
+    - id: ANGULAR-009
+      status: not-applicable
+      evidence: no authenticated routes or external effects
+      priority: low
+      next_action: Reassess if authentication or remote effects are introduced.
+    - id: ANGULAR-013
+      status: not-applicable
+      evidence: local-only application with no authorization boundary
+      priority: low
+      next_action: Reassess if accounts or server authorization are introduced.
     - id: ASTRO-001
-      status: compliant
-      evidence: astro.config.mjs, src/pages/index.astro, bun run build
-      priority: high
-      next_action: Scaffold Astro as the primary rendering model.
+      status: superseded
+      evidence: docs/decisions/0007-angular-standalone-and-tailwind-migration.md
+      priority: low
+      next_action: Use the Angular profile for current implementation reviews.
     - id: ASTRO-003
-      status: compliant
-      evidence: src/components/WorkspaceApp.tsx, src/pages/index.astro, src/pages/app.astro
-      priority: medium
-      next_action: Keep client-side code inside the scheduling workspace island.
+      status: superseded
+      evidence: docs/decisions/0007-angular-standalone-and-tailwind-migration.md
+      priority: low
+      next_action: Use Angular feature boundaries for current implementation reviews.
     - id: ASTRO-007
-      status: compliant
-      evidence: src/pages/index.astro, src/pages/app.astro, docs/architecture/proposed-system.md
-      priority: high
-      next_action: Document and review each interactive island boundary.
+      status: superseded
+      evidence: docs/decisions/0007-angular-standalone-and-tailwind-migration.md
+      priority: low
+      next_action: Use Angular routes and standalone components for current implementation reviews.
     - id: ASTRO-009
-      status: compliant
-      evidence: astro.config.mjs, bun run build
-      priority: medium
-      next_action: Verify deterministic static output and stable URLs.
+      status: superseded
+      evidence: docs/decisions/0007-angular-standalone-and-tailwind-migration.md
+      priority: low
+      next_action: Verify static Angular output instead.
     - id: ASTRO-012
       status: partial
-      evidence: astro.config.mjs, bun run build
+      evidence: docs/decisions/0005-vercel-static-deployment.md, angular.json, bun run build
       priority: medium
-      next_action: Add a deliberate 404 and deployment configuration before publishing.
+      next_action: Add deliberate 404 behavior and keep static hosting configuration current.
 
 exceptions:
   - id: runtime-service-rules

@@ -1,0 +1,42 @@
+<app-site-header [workspace]="true" />
+
+<main class="mx-auto w-[min(100%-2rem,1120px)] max-[760px]:w-[min(100%-1.25rem,1120px)] print:w-full print:max-w-none print:p-0">
+    <div class="grid gap-6 py-16 pb-6 max-[760px]:py-10 print:block print:p-0">
+        <header class="flex items-end justify-between gap-8 border-b border-[#d8dfd9] pb-7 max-[760px]:flex-col max-[760px]:items-start max-[760px]:gap-4 print:hidden">
+            <div>
+                <p class="mb-3 text-[0.67rem] font-medium tracking-[0.13em] text-[#49616a] uppercase">{{ 'workspace.kicker' | t }}</p>
+                <h1 class="mb-2 font-serif text-[clamp(2.7rem,6vw,4.8rem)] leading-[0.9] tracking-[-0.085em] max-[760px]:text-[clamp(2.8rem,14vw,4.4rem)]">{{ 'workspace.title' | t }}</h1>
+                <p class="m-0 max-w-[34rem] text-[0.9rem] leading-[1.5] text-[#49616a]">{{ 'workspace.intro' | t }}</p>
+            </div>
+            <span class="inline-flex shrink-0 items-center gap-2 border border-[#aebdb4] px-3 py-2 text-[0.67rem] font-medium tracking-[0.08em] text-[#49616a] uppercase"><span class="text-[#77a20c]" aria-hidden="true">●</span> {{ 'workspace.localOnly' | t }}</span>
+        </header>
+
+        <nav class="grid grid-cols-2 gap-3 max-[760px]:grid-cols-1 print:hidden" [attr.aria-label]="'workspace.sections' | t">
+            <app-button [ariaCurrent]="store.view() === 'people' ? 'page' : null" [buttonClass]="'flex min-h-[4.6rem] items-center gap-3 border border-[#d8dfd9] border-b-4 p-3 text-left transition-transform duration-150 active:scale-105 ' + (store.view() === 'people' ? 'border-b-[#e4ff69] bg-[#fffdf8] text-[#162b36]' : 'bg-[#fffdf8]/70 text-[#49616a] hover:border-[#aebdb4] hover:text-[#162b36]')" (buttonClick)="store.setView('people')">
+                <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[#aebdb4] text-xs" [class.bg-[#e4ff69]]="store.view() === 'people'" aria-hidden="true">●</span>
+                <span class="grid gap-1"><strong class="text-sm font-medium">{{ 'workspace.peopleNav' | t }}</strong><small class="text-[0.68rem] text-[#49616a]">{{ 'workspace.peopleNavDetail' | t }}</small></span>
+            </app-button>
+            <app-button [ariaCurrent]="store.view() === 'sessions' ? 'page' : null" [buttonClass]="'flex min-h-[4.6rem] items-center gap-3 border border-[#d8dfd9] border-b-4 p-3 text-left transition-transform duration-150 active:scale-105 ' + (store.view() === 'sessions' ? 'border-b-[#e4ff69] bg-[#fffdf8] text-[#162b36]' : 'bg-[#fffdf8]/70 text-[#49616a] hover:border-[#aebdb4] hover:text-[#162b36]')" (buttonClick)="store.setView('sessions')">
+                <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[#aebdb4] text-xs" [class.bg-[#e4ff69]]="store.view() === 'sessions'" aria-hidden="true">◒</span>
+                <span class="grid gap-1"><strong class="text-sm font-medium">{{ 'workspace.sessionsNav' | t }}</strong><small class="text-[0.68rem] text-[#49616a]">{{ 'workspace.sessionsNavDetail' | t }}</small></span>
+            </app-button>
+        </nav>
+
+        @if (store.view() === 'people') {
+            <app-people-view [workspace]="store.workspace()" />
+        } @else {
+            <app-sessions-view [workspace]="store.workspace()" />
+        }
+
+        <div class="flex items-center justify-between gap-4 pt-1 max-[760px]:items-start max-[760px]:flex-col print:hidden">
+            <p class="m-0 flex min-h-6 items-center gap-2 text-xs text-[#49616a]" role="status" aria-live="polite"><span class="h-2 w-2 shrink-0 rounded-full bg-[#77a20c]" aria-hidden="true"></span>{{ store.notice() || ('workspace.defaultNotice' | t) }}</p>
+            <app-button buttonClass="px-0 py-1 text-[0.68rem] font-medium text-[#162b36] underline-offset-4 hover:underline active:scale-105" (buttonClick)="store.resetWorkspace()">{{ 'workspace.reset' | t }}</app-button>
+        </div>
+    </div>
+</main>
+
+<app-site-footer [workspace]="true" [primaryText]="'workspace.savedInBrowser' | t" />
+
+@if (store.editor(); as editor) {
+    <app-condition-dialog [editor]="editor" [activeSession]="store.activeSession()" />
+}

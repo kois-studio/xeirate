@@ -8,11 +8,11 @@ The first release is intentionally small: no accounts, no server persistence, no
 
 ## Rendering and client boundary
 
-- Astro is the primary renderer and build system.
-- The public shell and static metadata are rendered by Astro.
-- The stateful scheduling workspace is a justified client island because it must react immediately to form input, candidate generation, and local persistence.
-- The browser island receives only the local workspace state it needs. No server-only or secret data is passed to it.
-- The first release is expected to use static output so it can be hosted cheaply or opened locally after a build.
+- Angular standalone components are the primary renderer and build system.
+- The public landing and workspace are localized routes (`/:lang/` and `/:lang/app`) in one static Angular application. The language is selected from localStorage, then the browser preference, with English as the fallback.
+- `WorkspaceService` owns signal state, browser persistence, and domain commands under `src/app/services/`; route pages live under `src/app/pages/`, and focused standalone components render people, sessions, schedule review, condition rows, and the condition dialog under `src/app/components/`.
+- Components receive only the local workspace state and typed events they need. No server-only or secret data is passed to the browser.
+- The first release remains static so it can be hosted cheaply or opened locally after a build.
 - The mobile shell includes a manifest and home-screen metadata; offline caching is deliberately deferred.
 
 ## Domain boundaries
@@ -22,14 +22,15 @@ The implementation keeps these responsibilities separate:
 - `domain`: participants, month sessions, conditions, candidate schedule models, conflict/fairness concepts, and pure validation.
 - `persistence`: versioned localStorage envelope, migrations, safe parsing, and browser capability handling.
 - `scheduling`: deterministic candidate generation and scoring within the provisional demo rule set.
-- `ui`: Astro pages and the interactive workspace; it translates coordinator actions into domain commands and displays outcomes.
+- `ui`: Angular standalone pages and shared components; `WorkspaceService` translates coordinator actions into domain commands and owns client state.
 - `export`: share text plus print-to-PDF through the browser; a downloadable file/image format remains open.
+- `i18n`: runtime English/Spanish dictionaries, language preference persistence, and the translation pipe. User-entered request notes are data, not UI copy, and are never automatically translated.
 
 The initial slice may keep these boundaries in a small number of files, but it must avoid coupling solver rules directly to DOM event handlers.
 
 ## User workflow
 
-1. The public landing explains the product and links to `/app`.
+1. The public landing explains the product and links to the localized workspace route.
 2. The coordinator introduces department participants using aliases in `Personas`.
 3. The coordinator records fixed conditions for people, including recurring weekdays.
 4. The coordinator starts or selects a session for a specific month in `Sesiones`.
@@ -43,7 +44,7 @@ The current implementation covers this workflow with one guardia per calendar da
 
 ## Styling and interaction
 
-Use one coherent primary styling system. The first implementation should favor semantic HTML, a calm and friendly visual language, mobile-first layout, visible focus states, reduced-motion support, and clear status messaging. A small local CSS system is acceptable if it remains the single source of truth; Tailwind and Lucide remain considered options rather than mandatory dependencies.
+Use Tailwind CSS as the one coherent primary styling system. Templates should favor semantic HTML, a calm and friendly visual language, mobile-first layout, visible focus states, reduced-motion support, and clear status messaging. Manual CSS is limited to Tailwind's import entrypoint and future documented specialized exceptions.
 
 ## Privacy and trust boundaries
 
