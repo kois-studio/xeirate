@@ -860,6 +860,13 @@ export class WorkspaceService {
         return this.languageService.translate(kindTranslationKey(kind));
     }
 
+    participantName(participantId: string): string {
+        return (
+            this.workspace().participants.find((participant) => participant.id === participantId)
+                ?.alias ?? '—'
+        );
+    }
+
     weekdaysSelectionLabel(values: number[]): string {
         if (values.length === 0) {
             return this.languageService.translate('condition.noneWeekdays');
