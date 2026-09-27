@@ -1,5 +1,5 @@
 <div class="fixed inset-0 z-10 grid overflow-y-auto place-items-center bg-[#162b36]/55 p-4" (keydown.escape)="store.closeConditionEditor()">
-    <section class="max-h-[calc(100vh-2rem)] w-[min(100%,35rem)] overflow-y-auto border border-[#162b36] bg-[#fffdf8] p-5 shadow-[0_22px_70px_rgba(22,43,54,0.25)]" role="dialog" aria-modal="true" aria-labelledby="condition-dialog-title" tabindex="-1">
+    <section #dialogPanel class="max-h-[calc(100vh-2rem)] w-[min(100%,35rem)] overflow-y-auto border border-[#162b36] bg-[#fffdf8] p-5 shadow-[0_22px_70px_rgba(22,43,54,0.25)]" role="dialog" aria-modal="true" aria-labelledby="condition-dialog-title" aria-describedby="condition-dialog-description" tabindex="-1" (keydown)="handleKeydown($event)">
         <div class="flex items-start justify-between gap-4">
             <div>
                 <p class="mb-3 text-[0.67rem] font-medium tracking-[0.13em] text-[#49616a] uppercase">{{ isFixed() ? ('condition.person' | t) : ('condition.session' | t) }} · {{ store.participantName(editor()?.participantId ?? '') }}</p>
@@ -7,7 +7,7 @@
             </div>
             <app-button [ariaLabel]="'condition.close' | t" buttonClass="grid h-7 w-7 shrink-0 place-items-center rounded text-xl text-[#49616a] transition-transform duration-150 hover:bg-[#d8dfd9] hover:text-[#162b36] active:scale-105" (buttonClick)="store.closeConditionEditor()"><span aria-hidden="true">×</span></app-button>
         </div>
-        <p class="my-3 mb-4 text-[0.8rem] leading-[1.45] text-[#49616a]">{{ 'condition.dialogIntro' | t }}</p>
+        <p id="condition-dialog-description" class="my-3 mb-4 text-[0.8rem] leading-[1.45] text-[#49616a]">{{ 'condition.dialogIntro' | t }}</p>
 
         <form class="grid gap-4" [formGroup]="form" (ngSubmit)="save()">
             <fieldset class="border-l-4 border-[#e4ff69] bg-[#f0f8be] p-3">

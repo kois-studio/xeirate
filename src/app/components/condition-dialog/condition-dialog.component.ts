@@ -1,4 +1,13 @@
-import { Component, effect, inject, input } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import {
+    Component,
+    effect,
+    type ElementRef,
+    inject,
+    input,
+    type OnDestroy,
+    viewChild,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import type { Session } from '../../../lib/domain';
@@ -20,12 +29,15 @@ import { AppButtonComponent } from '../button/button.component';
     imports: [AppButtonComponent, ReactiveFormsModule, TranslatePipe],
     templateUrl: './condition-dialog.component.html',
 })
-export class ConditionDialogComponent {
+export class ConditionDialogComponent implements OnDestroy {
     readonly editor = input<ConditionEditor | null>(null);
     readonly activeSession = input<Session | undefined>(undefined);
 
     readonly store = inject(WorkspaceService);
     readonly languageService = inject(LanguageService);
+    private readonly document = inject(DOCUMENT);
+    private readonly dialogPanel = viewChild<ElementRef<HTMLElement>>('dialogPanel');
+    private readonly previouslyFocusedElement = this.document.activeElement as HTMLElement | null;
     readonly weekdays = WEEKDAYS;
     private readonly formBuilder = inject(FormBuilder);
     readonly form = this.formBuilder.nonNullable.group({
@@ -68,6 +80,55 @@ export class ConditionDialogComponent {
             });
             this.submitted = false;
         });
+        effect(() => {
+            if (!this.editor() || !this.dialogPanel()) {
+                return;
+            }
+            queueMicrotask(() => this.dialogPanel()?.nativeElement.focus());
+        });
+    }
+
+    ngOnDestroy(): void {
+        if (this.previouslyFocusedElement?.isConnected) {
+            this.previouslyFocusedElement.focus();
+        }
+    }
+
+    handleKeydown(event: KeyboardEvent): void {
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            this.store.closeConditionEditor();
+            return;
+        }
+        if (event.key !== 'Tab') {
+            return;
+        }
+        const panel = this.dialogPanel()?.nativeElement;
+        if (!panel) {
+            return;
+        }
+        const focusable = Array.from(
+            panel.querySelectorAll<HTMLElement>(
+                'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+            ),
+        );
+        if (focusable.length === 0) {
+            event.preventDefault();
+            panel.focus();
+            return;
+        }
+        const first = focusable[0];
+        const last = focusable.at(-1);
+        if (!first || !last) {
+            return;
+        }
+        if (event.shiftKey && this.document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && this.document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        }
     }
 
     dateRangeInvalid(): boolean {
