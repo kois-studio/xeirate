@@ -13,8 +13,8 @@
             </a>
         }
         <fieldset class="flex items-center gap-1 rounded border border-[#d8dfd9] bg-[#fffdf8]/70 p-1" [attr.aria-label]="'language.switchTo' | t:{ language: languageService.language() === 'en' ? ('language.spanish' | t) : ('language.english' | t) }">
-            <app-button [ariaLabel]="'language.english' | t" [ariaPressed]="languageService.language() === 'en'" buttonClass="rounded px-2 py-1 text-[0.62rem] font-medium text-[#49616a] transition-colors hover:bg-[#e4f0f1]" (buttonClick)="selectLanguage('en')">EN</app-button>
-            <app-button [ariaLabel]="'language.spanish' | t" [ariaPressed]="languageService.language() === 'es'" buttonClass="rounded px-2 py-1 text-[0.62rem] font-medium text-[#49616a] transition-colors hover:bg-[#e4f0f1]" (buttonClick)="selectLanguage('es')">ES</app-button>
+            <app-button [ariaLabel]="'language.english' | t" [ariaPressed]="languageService.language() === 'en'" buttonClass="inline-flex min-h-10 min-w-10 items-center justify-center rounded px-2 py-1 text-xs font-medium text-[#49616a] transition-colors hover:bg-[#e4f0f1]" (buttonClick)="selectLanguage('en')">EN</app-button>
+            <app-button [ariaLabel]="'language.spanish' | t" [ariaPressed]="languageService.language() === 'es'" buttonClass="inline-flex min-h-10 min-w-10 items-center justify-center rounded px-2 py-1 text-xs font-medium text-[#49616a] transition-colors hover:bg-[#e4f0f1]" (buttonClick)="selectLanguage('es')">ES</app-button>
         </fieldset>
     </div>
 </header>

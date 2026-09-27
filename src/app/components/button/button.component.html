@@ -2,7 +2,7 @@
     [attr.aria-current]="ariaCurrent()"
     [attr.aria-label]="ariaLabel()"
     [attr.aria-pressed]="ariaPressed()"
-    [class]="buttonClass() + ' focus-visible:outline-3 focus-visible:outline-[#e4ff69] focus-visible:outline-offset-3 motion-reduce:transition-none active:scale-105'"
+    [class]="buttonClass() + ' min-h-10 min-w-10 touch-manipulation focus-visible:outline-3 focus-visible:outline-[#e4ff69] focus-visible:outline-offset-3 motion-reduce:transition-none active:scale-95'"
     [disabled]="disabled()"
     type="button"
     [attr.type]="type()"
@@ -10,4 +10,3 @@
 >
     <ng-content />
 </button>
-
