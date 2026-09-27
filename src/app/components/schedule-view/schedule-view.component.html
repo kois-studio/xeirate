@@ -24,11 +24,8 @@
             </div>
             @if (store.scheduleIssues().length > 0) {
                 <ul class="mb-4 grid gap-2 p-0 print:hidden" [attr.aria-label]="'schedule.alerts' | t">
-                    @for (issue of store.scheduleIssues().slice(0, 4); track issue.id) {
+                    @for (issue of store.scheduleIssues(); track issue.id) {
                         <li class="p-3 text-[0.74rem] leading-[1.45]" [class.bg-[#6f3f36]]="issue.severity === 'error'" [class.text-[#ffe4d8]]="issue.severity === 'error'" [class.bg-[#5f552e]]="issue.severity === 'warning'" [class.text-[#fff3bd]]="issue.severity === 'warning'" [class.bg-[#2d505d]]="issue.severity === 'info'" [class.text-[#d9edef]]="issue.severity === 'info'">{{ store.scheduleIssueLabel(issue) }}</li>
-                    }
-                    @if (store.scheduleIssues().length > 4) {
-                        <li class="bg-[#2d505d] p-3 text-[0.74rem] leading-[1.45] text-[#d9edef]">{{ 'schedule.moreAlerts' | t:{ count: store.scheduleIssues().length - 4 } }}</li>
                     }
                 </ul>
             } @else {
