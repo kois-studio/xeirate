@@ -21,6 +21,8 @@ const englishTranslations = {
     'landing.title': 'The month, made clearer.',
     'landing.intro':
         'Xeirate lets you define the rules of any recurring schedule, then turns requests and preferences into a monthly proposal you can review with your team.',
+    'landing.formatsNote':
+        'For example: configure an on-call rota with recurring availability, rest rules, and preferences. Today you review it as a calendar; list and other export formats are planned next.',
     'landing.prepareSession': 'Start a calendar',
     'landing.seeHow': 'See how it works',
     'landing.sectionEyebrow': 'A tool for putting the month in order',
@@ -309,6 +311,8 @@ const spanishTranslations = {
     'landing.title': 'El mes, más claro.',
     'landing.intro':
         'Xeirate te permite definir las reglas de cualquier calendario recurrente y convertir peticiones y preferencias en una propuesta mensual que puedes revisar con tu equipo.',
+    'landing.formatsNote':
+        'Por ejemplo: configura una guardia con disponibilidades recurrentes, descansos y preferencias. Hoy la revisas como calendario; después llegarán las vistas en lista y otros formatos de salida.',
     'landing.prepareSession': 'Crear un calendario',
     'landing.seeHow': 'Ver cómo funciona',
     'landing.sectionEyebrow': 'Una herramienta para ordenar el mes',
