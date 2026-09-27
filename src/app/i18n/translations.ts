@@ -192,6 +192,8 @@ const englishTranslations = {
     'schedule.noAlerts': 'There are no alerts in this proposal.',
     'schedule.share': 'Share proposal',
     'schedule.print': 'Print / PDF',
+    'schedule.image': 'PNG image',
+    'schedule.noAssignments': 'No assignments in this proposal.',
     'schedule.previousProposals': 'Previous proposals',
     'schedule.previousProposal': 'Proposal {attempt} · {assignments} assignments',
     'schedule.restore': 'Restore',
@@ -296,6 +298,8 @@ const englishTranslations = {
     'notice.workspaceImportedMigrated':
         'Workspace backup imported and updated to the current format.',
     'notice.workspaceImportInvalid': 'That backup is not a valid Xeirate workspace file.',
+    'notice.imageExported': 'Schedule image downloaded.',
+    'notice.imageExportUnavailable': 'This browser could not create a schedule image.',
     'notice.exampleLoaded':
         'Anonymized example loaded. Review the conditions and generate a proposal.',
     'notice.proposalShared': 'Proposal shared.',
@@ -511,6 +515,8 @@ const spanishTranslations = {
     'schedule.noAlerts': 'No hay alertas en esta propuesta.',
     'schedule.share': 'Compartir propuesta',
     'schedule.print': 'Imprimir / PDF',
+    'schedule.image': 'Imagen PNG',
+    'schedule.noAssignments': 'No hay asignaciones en esta propuesta.',
     'schedule.previousProposals': 'Propuestas anteriores',
     'schedule.previousProposal': 'Propuesta {attempt} · {assignments} asignaciones',
     'schedule.restore': 'Recuperar',
@@ -614,6 +620,8 @@ const spanishTranslations = {
     'notice.workspaceImported': 'Copia del espacio importada.',
     'notice.workspaceImportedMigrated': 'Copia importada y actualizada al formato actual.',
     'notice.workspaceImportInvalid': 'La copia no es un archivo de espacio Xeirate válido.',
+    'notice.imageExported': 'Imagen del calendario descargada.',
+    'notice.imageExportUnavailable': 'Este navegador no ha podido crear la imagen del calendario.',
     'notice.exampleLoaded':
         'Ejemplo anonimizado cargado. Revisa las condiciones y genera una propuesta.',
     'notice.proposalShared': 'Propuesta compartida.',

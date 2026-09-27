@@ -1,6 +1,12 @@
+import { DOCUMENT } from '@angular/common';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 
-import { getDaysInMonth, type ScheduleAssignment, type Session } from '../../../lib/domain';
+import {
+    getDaysInMonth,
+    type Schedule,
+    type ScheduleAssignment,
+    type Session,
+} from '../../../lib/domain';
 import { countCoverageSlots } from '../../../lib/scheduler';
 import type { TranslationKey } from '../../i18n/translations';
 import { TranslatePipe } from '../../pipes/translate.pipe';
@@ -16,6 +22,7 @@ import { AppButtonComponent } from '../button/button.component';
 export class ScheduleViewComponent {
     readonly store = inject(WorkspaceService);
     readonly weekdayHeaders = WEEKDAYS;
+    private readonly document = inject(DOCUMENT);
     readonly reviewChecks = signal({ alerts: false, coverage: false });
     readonly reviewReady = computed(() => {
         const checks = this.reviewChecks();
@@ -36,6 +43,49 @@ export class ScheduleViewComponent {
 
     setReviewCheck(key: 'alerts' | 'coverage', checked: boolean): void {
         this.reviewChecks.update((current) => ({ ...current, [key]: checked }));
+    }
+
+    exportScheduleImage(session: Session, schedule: Schedule): void {
+        const canvas = this.document.createElement('canvas');
+        const rows = schedule.assignments.length > 0 ? schedule.assignments : [null];
+        canvas.width = 1200;
+        canvas.height = 150 + rows.length * 48;
+        const context = canvas.getContext('2d');
+        if (!context) {
+            this.store.notice.set(this.store.translate('notice.imageExportUnavailable'));
+            return;
+        }
+        context.fillStyle = '#162b36';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = '#e4ff69';
+        context.font = '600 42px Georgia, serif';
+        context.fillText(`Xeirate · ${this.store.monthLabel(session.month)}`, 56, 68);
+        context.fillStyle = '#aec2c5';
+        context.font = '20px sans-serif';
+        context.fillText(
+            `${schedule.assignments.length} / ${this.requiredSlotCount(session)} · ${schedule.fairness.maxDifference} ${this.store.translate('schedule.maxDifference')}`,
+            58,
+            108,
+        );
+        rows.forEach((assignment, index) => {
+            const y = 150 + index * 48;
+            context.fillStyle = index % 2 === 0 ? '#213b47' : '#1e3742';
+            context.fillRect(40, y - 30, canvas.width - 80, 40);
+            context.fillStyle = assignment ? '#ffffff' : '#aec2c5';
+            context.font = '500 20px sans-serif';
+            context.fillText(
+                assignment
+                    ? `${assignment.date} · ${this.assignmentMetadata(assignment, session)} · ${this.assignmentAlias(assignment.participantId)}`
+                    : this.store.translate('schedule.noAssignments'),
+                58,
+                y - 4,
+            );
+        });
+        const anchor = this.document.createElement('a');
+        anchor.download = `xeirate-${session.month}.png`;
+        anchor.href = canvas.toDataURL('image/png');
+        anchor.click();
+        this.store.notice.set(this.store.translate('notice.imageExported'));
     }
 
     calendarDates(session: Session): string[] {

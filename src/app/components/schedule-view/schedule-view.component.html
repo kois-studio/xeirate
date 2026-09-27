@@ -44,6 +44,7 @@
             <div class="mb-5 flex flex-wrap gap-2 print:hidden">
                 <app-button [disabled]="!reviewReady()" buttonClass="inline-flex min-h-11 items-center justify-center gap-2 rounded-[0.4rem] bg-[#e4ff69] px-4 py-2.5 text-sm font-medium text-[#162b36] transition-transform duration-150 hover:-translate-y-px active:scale-105 disabled:cursor-not-allowed disabled:opacity-50" (buttonClick)="store.shareSchedule()">{{ 'schedule.share' | t }}</app-button>
                 <app-button buttonClass="inline-flex min-h-11 items-center justify-center gap-2 rounded-[0.4rem] border border-[#60737b] px-4 py-2.5 text-sm font-medium text-white transition-transform duration-150 hover:border-[#e4ff69] hover:bg-[#233b46] active:scale-105" (buttonClick)="store.printSchedule()">{{ 'schedule.print' | t }}</app-button>
+                <app-button buttonClass="inline-flex min-h-11 items-center justify-center gap-2 rounded-[0.4rem] border border-[#60737b] px-4 py-2.5 text-sm font-medium text-white transition-transform duration-150 hover:border-[#e4ff69] hover:bg-[#233b46] active:scale-105" (buttonClick)="exportScheduleImage(session, schedule)">{{ 'schedule.image' | t }}</app-button>
             </div>
             @if (store.activeProposalHistory().length > 0) {
                 <details class="mb-5 rounded border border-[#35515b] bg-[#213b47] p-3 print:hidden">
