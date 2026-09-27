@@ -117,7 +117,9 @@
                         </div>
                     </section>
                 }
-                <app-schedule-view />
+                @if (showSchedule()) {
+                    <app-schedule-view />
+                }
             </div>
         </div>
     } @else {

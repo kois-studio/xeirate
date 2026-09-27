@@ -15,6 +15,7 @@ import { ConditionRowComponent } from '../condition-row/condition-row.component'
 })
 export class PeopleViewComponent {
     readonly workspace = input.required<Workspace>();
+    readonly mode = input<'people' | 'conditions'>('people');
 
     readonly store = inject(WorkspaceService);
     private readonly formBuilder = inject(FormBuilder);

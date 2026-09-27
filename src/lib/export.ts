@@ -16,7 +16,7 @@ const shareCopy = {
     },
     es: {
         unnamed: 'Sin nombre',
-        shiftsFor: 'Guardias de {month}',
+        shiftsFor: 'Calendario de {month}',
         proposal: 'Propuesta {attempt} · Xeirate',
         review: 'Revisar antes de compartir como definitivo:',
         issue: {

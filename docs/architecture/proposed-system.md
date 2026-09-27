@@ -31,11 +31,11 @@ The initial slice may keep these boundaries in a small number of files, but it m
 ## User workflow
 
 1. The public landing explains the product and links to the localized workspace route.
-2. The coordinator introduces department participants using aliases in `Personas`.
-3. The coordinator records fixed conditions for people, including recurring weekdays.
-4. The coordinator starts or selects a session for a specific month in `Sesiones`.
-5. The coordinator adds one structured condition at a time, choosing whether it is a hard requirement, a soft preference, or a request that needs clarification.
-6. The coordinator generates a candidate schedule after accepted conditions.
+2. The coordinator introduces department participants using aliases in the `People` step.
+3. The coordinator records fixed conditions for people, including recurring weekdays, in the `Conditions` step.
+4. The coordinator starts or selects a session for a specific month and configures coverage in the `Session` step.
+5. The coordinator adds one structured monthly condition at a time, choosing whether it is a hard requirement, a soft preference, or a request that needs clarification.
+6. The coordinator generates a candidate schedule in the focused `Proposal` step.
 7. The coordinator retries generation to explore another candidate with the same inputs.
 8. The coordinator reviews conflicts, clarification warnings, and fairness summary.
 9. The coordinator shares text or opens the browser print flow to save a PDF.

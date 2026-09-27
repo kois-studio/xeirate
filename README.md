@@ -1,6 +1,6 @@
 # Xeirate
 
-Xeirate is a local-first web tool for translating informal staff requests into a clear, reviewable monthly guardia schedule.
+Xeirate is a local-first web tool for turning team rules and informal requests into a clear, reviewable schedule for any type of recurring shift or coverage.
 
 The project is in early implementation. The tracked project documentation lives in [`docs/README.md`](docs/README.md). A separate private discovery specification may exist locally at `docs/SPEC.md`; it is intentionally ignored and must not be committed because it contains personal and real-world context.
 

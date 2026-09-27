@@ -44,7 +44,7 @@ describe('formatScheduleForSharing', () => {
             ],
         });
 
-        expect(text).toContain('Guardias de noviembre de 2026');
+        expect(text).toContain('Calendario de noviembre de 2026');
         expect(text).toContain('1 nov: Nube');
         expect(text).toContain('Revisar antes de compartir como definitivo:');
         expect(text).toContain('Hay una petición que necesita revisión.');

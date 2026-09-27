@@ -33,7 +33,7 @@ import { generateSchedule } from '../../lib/scheduler';
 import type { TranslationKey, TranslationParams } from '../i18n/translations';
 import { LanguageService } from './language.service';
 
-export type AppView = 'people' | 'sessions';
+export type WizardStep = 'people' | 'conditions' | 'session' | 'proposal';
 export type ConditionScope = 'fixed' | 'session';
 export type EditableConditionKind = Exclude<ConditionKind, 'clarification'>;
 
@@ -85,7 +85,7 @@ export class WorkspaceService {
     private readonly languageService = inject(LanguageService);
 
     readonly workspace = signal<Workspace>(emptyWorkspace());
-    readonly view = signal<AppView>('people');
+    readonly wizardStep = signal<WizardStep>('people');
     readonly month = signal(currentMonth());
     readonly notice = signal('');
     readonly storageReady = signal(false);
@@ -141,9 +141,26 @@ export class WorkspaceService {
         this.scheduleIssues().filter((item) => item.severity === 'warning'),
     );
 
+    private initialWizardStep(workspace: Workspace): WizardStep {
+        if (workspace.participants.length === 0) {
+            return 'people';
+        }
+        const activeSession = workspace.sessions.find(
+            (session) => session.id === workspace.activeSessionId,
+        );
+        if (activeSession?.schedule) {
+            return 'proposal';
+        }
+        if (activeSession) {
+            return 'session';
+        }
+        return 'conditions';
+    }
+
     constructor() {
         const result = loadWorkspace(this.storage);
         this.workspace.set(result.workspace);
+        this.wizardStep.set(this.initialWizardStep(result.workspace));
         this.storageReady.set(true);
         this.notice.set(
             result.status === 'invalid'
@@ -168,8 +185,44 @@ export class WorkspaceService {
         return this.languageService.translate(key, params);
     }
 
-    setView(view: AppView): void {
-        this.view.set(view);
+    setWizardStep(step: WizardStep): void {
+        if (step !== 'people' && this.workspace().participants.length === 0) {
+            this.wizardStep.set('people');
+            this.notice.set(this.languageService.translate('notice.peopleRequired'));
+            return;
+        }
+        if (step === 'proposal' && !this.activeSession()) {
+            this.wizardStep.set('session');
+            this.notice.set(this.languageService.translate('notice.sessionRequired'));
+            return;
+        }
+        this.wizardStep.set(step);
+    }
+
+    nextWizardStep(): void {
+        const next: Record<WizardStep, WizardStep | null> = {
+            people: 'conditions',
+            conditions: 'session',
+            session: 'proposal',
+            proposal: null,
+        };
+        const nextStep = next[this.wizardStep()];
+        if (nextStep) {
+            this.setWizardStep(nextStep);
+        }
+    }
+
+    previousWizardStep(): void {
+        const previous: Record<WizardStep, WizardStep | null> = {
+            people: null,
+            conditions: 'people',
+            session: 'conditions',
+            proposal: 'session',
+        };
+        const previousStep = previous[this.wizardStep()];
+        if (previousStep) {
+            this.setWizardStep(previousStep);
+        }
     }
 
     fixedConditions(participantId: string): Condition[] {
@@ -242,7 +295,7 @@ export class WorkspaceService {
         const current = this.workspace();
         if (current.participants.length === 0) {
             this.notice.set(this.languageService.translate('notice.peopleRequired'));
-            this.view.set('people');
+            this.wizardStep.set('people');
             return;
         }
 
@@ -286,7 +339,7 @@ export class WorkspaceService {
             conditions: [...currentWorkspace.conditions, ...oldReusableConditions],
         }));
         this.month.set(month);
-        this.view.set('sessions');
+        this.wizardStep.set('session');
         this.notice.set(
             oldReusableConditions.length > 0
                 ? this.languageService.translate('notice.sessionPreparedWithFixed', {
@@ -306,7 +359,7 @@ export class WorkspaceService {
         }
         this.workspace.update((current) => ({ ...current, activeSessionId: sessionId }));
         this.month.set(session.month);
-        this.view.set('sessions');
+        this.wizardStep.set('session');
     }
 
     activeScheduleConfiguration(): ScheduleConfiguration | undefined {
@@ -620,7 +673,7 @@ export class WorkspaceService {
     loadDemo(): void {
         this.workspace.set(createDemoWorkspace(this.languageService.language()));
         this.month.set('2026-11');
-        this.view.set('sessions');
+        this.wizardStep.set('session');
         this.notice.set(this.languageService.translate('notice.exampleLoaded'));
     }
 
@@ -670,7 +723,7 @@ export class WorkspaceService {
         clearWorkspace(this.storage);
         this.workspace.set(emptyWorkspace());
         this.month.set(currentMonth());
-        this.view.set('people');
+        this.wizardStep.set('people');
         this.notice.set(this.languageService.translate('notice.workspaceDeleted'));
     }
 

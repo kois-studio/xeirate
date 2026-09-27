@@ -22,6 +22,7 @@ import { ScheduleViewComponent } from '../schedule-view/schedule-view.component'
 })
 export class SessionsViewComponent {
     readonly workspace = input.required<Workspace>();
+    readonly showSchedule = input(true);
 
     readonly store = inject(WorkspaceService);
     private readonly formBuilder = inject(FormBuilder);

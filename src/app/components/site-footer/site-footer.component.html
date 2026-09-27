@@ -1,4 +1,4 @@
-<footer class="mx-auto flex w-[min(100%-2rem,1120px)] justify-between gap-4 py-6 pb-10 text-[0.7rem] text-[#7b8a88] max-[760px]:w-[min(100%-1.25rem,1120px)] max-[760px]:flex-col max-[760px]:items-start print:hidden">
+<footer class="mx-auto flex w-full max-w-[1120px] justify-between gap-4 px-5 py-6 pb-10 text-[0.7rem] text-[#7b8a88] max-[760px]:flex-col max-[760px]:items-start sm:px-6 print:hidden">
     <span>{{ primaryText() ?? ('footer.firstVersion' | t) }}</span>
     @if (workspace()) {
         <a class="font-medium text-[#162b36] underline underline-offset-4" href="/" [routerLink]="languageService.localizedUrl('/', languageService.language())">{{ 'nav.backToLanding' | t }}</a>

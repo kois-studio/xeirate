@@ -11,3 +11,4 @@ Durable architecture and policy decisions live here. Accepted ADRs are not silen
 - [`0007-angular-standalone-and-tailwind-migration.md`](0007-angular-standalone-and-tailwind-migration.md) — accepted Angular standalone application and Tailwind-only styling architecture.
 - [`0008-runtime-language-routing.md`](0008-runtime-language-routing.md) — accepted English/Spanish runtime localization with language-prefixed routes and persisted preference.
 - [`0009-generic-coverage-and-calendar-modes.md`](0009-generic-coverage-and-calendar-modes.md) — accepted generic coverage slots, configurable columns, cadence, rest rules, and single/column calendar rendering modes.
+- [`0010-wizard-first-workspace.md`](0010-wizard-first-workspace.md) — accepted mobile-first wizard flow separating team setup, conditions, session configuration, and proposal review.

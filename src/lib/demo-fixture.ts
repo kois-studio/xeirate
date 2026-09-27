@@ -131,7 +131,7 @@ export function createDemoWorkspace(language: DemoLanguage = 'es'): Workspace {
                 kind: 'clarification',
                 startDate: null,
                 endDate: null,
-                note: 'Sería útil dejar 4–5 días sin guardia para cubrir cambios de vacaciones.',
+                note: 'Sería útil dejar 4–5 turnos abiertos para cubrir cambios de vacaciones.',
             }),
             demoCondition({
                 id: 'demo-alba-holiday',
