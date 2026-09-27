@@ -36,6 +36,7 @@ export class ConditionDialogComponent {
         weekdays: this.formBuilder.nonNullable.control<number[]>([...ALL_WEEKDAY_VALUES]),
         note: this.formBuilder.nonNullable.control('', Validators.required),
     });
+    submitted = false;
 
     constructor() {
         effect(() => {
@@ -65,7 +66,28 @@ export class ConditionDialogComponent {
                         : [...ALL_WEEKDAY_VALUES],
                 note: condition?.note ?? '',
             });
+            this.submitted = false;
         });
+    }
+
+    dateRangeInvalid(): boolean {
+        const { startDate, endDate } = this.form.getRawValue();
+        return Boolean(startDate && endDate && startDate > endDate);
+    }
+
+    showNoteError(): boolean {
+        return (
+            this.form.controls.note.invalid && (this.form.controls.note.touched || this.submitted)
+        );
+    }
+
+    showDateError(): boolean {
+        return (
+            this.dateRangeInvalid() &&
+            (this.form.controls.startDate.touched ||
+                this.form.controls.endDate.touched ||
+                this.submitted)
+        );
     }
 
     isFixed(): boolean {
@@ -90,19 +112,23 @@ export class ConditionDialogComponent {
     }
 
     save(): void {
+        this.submitted = true;
+        this.form.markAllAsTouched();
         if (
             this.form.invalid ||
             !this.form.controls.kind.value ||
-            (this.isFixed() && this.form.controls.weekdays.value.length === 0)
+            (this.isFixed() && this.form.controls.weekdays.value.length === 0) ||
+            this.dateRangeInvalid()
         ) {
-            this.form.controls.note.markAsTouched();
             this.store.notice.set(
                 this.languageService.translate(
-                    this.isFixed() && this.form.controls.weekdays.value.length === 0
-                        ? 'notice.weekdayRequired'
-                        : this.form.controls.kind.value
-                          ? 'notice.noteRequired'
-                          : 'notice.conditionTypeRequired',
+                    this.dateRangeInvalid()
+                        ? 'notice.endDateInvalid'
+                        : this.isFixed() && this.form.controls.weekdays.value.length === 0
+                          ? 'notice.weekdayRequired'
+                          : this.form.controls.kind.value
+                            ? 'notice.noteRequired'
+                            : 'notice.conditionTypeRequired',
                 ),
             );
             return;
