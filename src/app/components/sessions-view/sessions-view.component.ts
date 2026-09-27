@@ -1,4 +1,4 @@
-import { Component, inject, input } from '@angular/core';
+import { Component, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 
 import type { ScheduleColumn, Workspace } from '../../../lib/domain';
@@ -7,6 +7,8 @@ import { WEEKDAYS, WorkspaceService } from '../../services/workspace.service';
 import { AppButtonComponent } from '../button/button.component';
 import { ConditionRowComponent } from '../condition-row/condition-row.component';
 import { ScheduleViewComponent } from '../schedule-view/schedule-view.component';
+
+type SessionSection = 'calendar' | 'coverage' | 'requests';
 
 @Component({
     selector: 'app-sessions-view',
@@ -23,6 +25,7 @@ import { ScheduleViewComponent } from '../schedule-view/schedule-view.component'
 export class SessionsViewComponent {
     readonly workspace = input.required<Workspace>();
     readonly showSchedule = input(true);
+    readonly section = signal<SessionSection>('calendar');
 
     readonly store = inject(WorkspaceService);
     private readonly formBuilder = inject(FormBuilder);
@@ -32,6 +35,21 @@ export class SessionsViewComponent {
 
     startSession(): void {
         this.store.startSession(this.form.controls.month.value);
+        if (this.store.activeSession()) {
+            this.section.set('coverage');
+        }
+    }
+
+    selectSession(sessionId: string): void {
+        this.store.selectSession(sessionId);
+        this.section.set('coverage');
+    }
+
+    setSection(section: SessionSection): void {
+        if (section !== 'calendar' && !this.store.activeSession()) {
+            return;
+        }
+        this.section.set(section);
     }
 
     addColumn(): void {

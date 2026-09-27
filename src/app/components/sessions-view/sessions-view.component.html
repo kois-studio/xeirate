@@ -8,11 +8,21 @@
         <app-button buttonClass="inline-flex min-h-11 items-center justify-center rounded-[0.4rem] border border-[#aebdb4] px-4 py-2.5 text-sm font-medium text-[#162b36] transition-transform duration-150 hover:-translate-y-px hover:bg-[#fffdf8] active:scale-105" (buttonClick)="store.loadDemo()">{{ 'sessions.loadExample' | t }}</app-button>
     </div>
 
-    <form class="grid grid-cols-[1fr_auto_auto] items-end gap-4 border-t-[0.3rem] border-[#e4ff69] bg-[#fffdf8] p-4 max-[760px]:grid-cols-1 max-[760px]:items-stretch print:hidden" [formGroup]="form" (ngSubmit)="startSession()">
-        <div class="grid gap-1"><label class="mb-1 block text-[0.73rem] font-medium" for="session-month">{{ 'sessions.newSession' | t }}</label><span class="text-[0.7rem] text-[#49616a]">{{ 'sessions.chooseMonth' | t }}</span></div>
-        <input class="min-h-11 rounded border border-[#aebdb4] bg-[#fffdf8] px-3 py-2.5 text-[#162b36] outline-none focus-visible:outline-3 focus-visible:outline-[#e4ff69] focus-visible:outline-offset-3" id="session-month" formControlName="month" type="month" />
-        <app-button buttonClass="inline-flex min-h-11 items-center justify-center gap-2 rounded-[0.4rem] bg-[#162b36] px-4 py-2.5 text-sm font-medium text-white transition-transform duration-150 hover:-translate-y-px hover:bg-[#24424e] active:scale-105" type="submit">{{ 'sessions.create' | t }} <span aria-hidden="true">→</span></app-button>
-    </form>
+    @if (section() === 'calendar') {
+        <form class="grid grid-cols-[1fr_auto_auto] items-end gap-4 border-t-[0.3rem] border-[#e4ff69] bg-[#fffdf8] p-4 max-[760px]:grid-cols-1 max-[760px]:items-stretch print:hidden" [formGroup]="form" (ngSubmit)="startSession()">
+            <div class="grid gap-1"><label class="mb-1 block text-[0.73rem] font-medium" for="session-month">{{ 'sessions.newSession' | t }}</label><span class="text-[0.7rem] text-[#49616a]">{{ 'sessions.chooseMonth' | t }}</span></div>
+            <input class="min-h-11 rounded border border-[#aebdb4] bg-[#fffdf8] px-3 py-2.5 text-[#162b36] outline-none focus-visible:outline-3 focus-visible:outline-[#e4ff69] focus-visible:outline-offset-3" id="session-month" formControlName="month" type="month" />
+            <app-button buttonClass="inline-flex min-h-11 items-center justify-center gap-2 rounded-[0.4rem] bg-[#162b36] px-4 py-2.5 text-sm font-medium text-white transition-transform duration-150 hover:-translate-y-px hover:bg-[#24424e] active:scale-105" type="submit">{{ 'sessions.create' | t }} <span aria-hidden="true">→</span></app-button>
+        </form>
+    }
+
+    @if (store.activeSession(); as activeSession) {
+        <nav class="grid grid-cols-3 gap-2 print:hidden" [attr.aria-label]="'sessions.sectionNavigation' | t">
+            <app-button [ariaPressed]="section() === 'calendar'" [buttonClass]="'rounded border px-3 py-2 text-left text-xs transition-colors active:scale-105 ' + (section() === 'calendar' ? 'border-[#162b36] bg-[#e4ff69] text-[#162b36]' : 'border-[#d8dfd9] bg-[#fffdf8] text-[#49616a] hover:border-[#aebdb4]')" (buttonClick)="setSection('calendar')"><strong class="block">{{ 'sessions.sectionCalendar' | t }}</strong><small class="mt-1 block text-[0.67rem]">{{ 'sessions.sectionCalendarHelp' | t }}</small></app-button>
+            <app-button [ariaPressed]="section() === 'coverage'" [buttonClass]="'rounded border px-3 py-2 text-left text-xs transition-colors active:scale-105 ' + (section() === 'coverage' ? 'border-[#162b36] bg-[#e4ff69] text-[#162b36]' : 'border-[#d8dfd9] bg-[#fffdf8] text-[#49616a] hover:border-[#aebdb4]')" (buttonClick)="setSection('coverage')"><strong class="block">{{ 'sessions.sectionCoverage' | t }}</strong><small class="mt-1 block text-[0.67rem]">{{ 'sessions.sectionCoverageHelp' | t }}</small></app-button>
+            <app-button [ariaPressed]="section() === 'requests'" [buttonClass]="'rounded border px-3 py-2 text-left text-xs transition-colors active:scale-105 ' + (section() === 'requests' ? 'border-[#162b36] bg-[#e4ff69] text-[#162b36]' : 'border-[#d8dfd9] bg-[#fffdf8] text-[#49616a] hover:border-[#aebdb4]')" (buttonClick)="setSection('requests')"><strong class="block">{{ 'sessions.sectionRequests' | t }}</strong><small class="mt-1 block text-[0.67rem]">{{ 'sessions.sectionRequestsHelp' | t }}</small></app-button>
+        </nav>
+    }
 
     @if (workspace().sessions.length > 0) {
         <div class="grid grid-cols-[minmax(13rem,0.34fr)_minmax(0,1fr)] items-start gap-4 max-[760px]:grid-cols-1">
@@ -21,7 +31,7 @@
                 <ul class="mt-3 grid gap-2 p-0">
                     @for (session of workspace().sessions; track session.id) {
                         <li>
-                            <app-button [buttonClass]="'flex w-full items-center gap-3 rounded border px-2.5 py-2.5 text-left transition-transform duration-150 active:scale-105 ' + (session.id === store.activeSession()?.id ? 'border-[#162b36] bg-[#e4ff69]' : 'border-transparent text-[#162b36] hover:bg-[#f4f3ed]')" (buttonClick)="store.selectSession(session.id)">
+                            <app-button [buttonClass]="'flex w-full items-center gap-3 rounded border px-2.5 py-2.5 text-left transition-transform duration-150 active:scale-105 ' + (session.id === store.activeSession()?.id ? 'border-[#162b36] bg-[#e4ff69]' : 'border-transparent text-[#162b36] hover:bg-[#f4f3ed]')" (buttonClick)="selectSession(session.id)">
                                 <span class="grid h-9 w-9 shrink-0 place-items-center rounded border border-[#aebdb4] bg-[#fffdf8] text-[0.65rem] font-medium text-[#162b36]">{{ store.monthLabel(session.month).split(' ')[0]?.slice(0, 3) ?? '' }}</span>
                                 <span class="grid min-w-0 gap-1"><strong class="text-[0.78rem] font-medium">{{ store.monthLabel(session.month) }}</strong><small class="text-[0.66rem] text-[#49616a]">{{ 'sessions.peopleCount' | t:{ count: session.participantIds.length } }} · {{ session.schedule ? ('sessions.withProposal' | t) : ('sessions.withoutProposal' | t) }}</small></span>
                             </app-button>
@@ -31,8 +41,19 @@
             </aside>
 
             <div class="grid min-w-0 gap-4">
+                @if (section() === 'calendar') {
+                    <section class="grid gap-3 border border-[#d8dfd9] bg-[#fffdf8] p-5 print:hidden" aria-labelledby="calendar-step-title">
+                        <div>
+                            <p class="mb-2 text-[0.67rem] font-medium tracking-[0.13em] text-[#49616a] uppercase">{{ 'sessions.sectionCalendar' | t }}</p>
+                            <h2 id="calendar-step-title" class="mb-2 font-serif text-[clamp(1.8rem,4vw,2.4rem)] leading-[0.95] tracking-[-0.07em]">{{ 'sessions.calendarReadyTitle' | t:{ month: store.monthLabel(store.activeSession()?.month ?? '') } }}</h2>
+                            <p class="m-0 max-w-[38rem] text-[0.8rem] leading-[1.5] text-[#49616a]">{{ 'sessions.calendarReadyBody' | t }}</p>
+                        </div>
+                        <app-button buttonClass="inline-flex min-h-11 w-fit items-center justify-center gap-2 rounded-[0.4rem] bg-[#162b36] px-4 py-2.5 text-sm font-medium text-white transition-transform duration-150 hover:-translate-y-px hover:bg-[#24424e] active:scale-105" (buttonClick)="setSection('coverage')">{{ 'sessions.continueToCoverage' | t }} <span aria-hidden="true">→</span></app-button>
+                    </section>
+                }
                 @if (store.activeSession(); as activeSession) {
-                    <section class="grid gap-4 border border-[#d8dfd9] bg-[#fffdf8] p-5 print:hidden" aria-labelledby="schedule-config-title">
+                    @if (section() === 'coverage') {
+                        <section class="grid gap-4 border border-[#d8dfd9] bg-[#fffdf8] p-5 print:hidden" aria-labelledby="schedule-config-title">
                         <div>
                             <p class="mb-3 text-[0.67rem] font-medium tracking-[0.13em] text-[#49616a] uppercase">{{ 'sessions.configurationKicker' | t }}</p>
                             <h2 id="schedule-config-title" class="mb-2 font-serif text-[clamp(1.8rem,4vw,2.4rem)] leading-[0.95] tracking-[-0.07em]">{{ 'sessions.configurationTitle' | t }}</h2>
@@ -88,8 +109,10 @@
                             }
                             </div>
                         }
-                    </section>
-                    <section class="border border-[#d8dfd9] bg-[#fffdf8] p-5 print:hidden" aria-labelledby="session-detail-title">
+                        </section>
+                    }
+                    @if (section() === 'requests') {
+                        <section class="border border-[#d8dfd9] bg-[#fffdf8] p-5 print:hidden" aria-labelledby="session-detail-title">
                         <div class="flex items-start justify-between gap-4">
                             <div><p class="mb-3 text-[0.67rem] font-medium tracking-[0.13em] text-[#49616a] uppercase">{{ 'sessions.active' | t }}</p><h2 id="session-detail-title" class="mb-2 font-serif text-[clamp(2rem,5vw,3rem)] leading-[0.95] tracking-[-0.075em]">{{ 'sessions.requestsFor' | t:{ month: store.monthLabel(activeSession.month) } }}</h2></div>
                             <span class="shrink-0 border border-[#aebdb4] bg-[#f4f3ed] px-2.5 py-2 text-[0.67rem] text-[#49616a]">{{ 'sessions.conditionCount' | t:{ count: store.activeConditions().length } }}</span>
@@ -115,7 +138,8 @@
                                 </article>
                             }
                         </div>
-                    </section>
+                        </section>
+                    }
                 }
                 @if (showSchedule()) {
                     <app-schedule-view />
