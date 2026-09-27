@@ -7,7 +7,7 @@
     >{{ store.conditionKindLabel(condition().kind) }}</app-button>
     <div class="grid min-w-0 gap-1">
         <strong class="text-[0.76rem] font-semibold">{{ store.conditionSummary(condition()) }}</strong>
-        <span class="overflow-hidden text-ellipsis whitespace-nowrap text-[0.7rem] leading-[1.4] text-[#49616a]">{{ condition().note }}</span>
+        <span class="break-words text-[0.7rem] leading-[1.4] text-[#49616a]">{{ condition().note }}</span>
         @if (condition().sessionId === null) {
             <small class="text-[0.7rem] leading-[1.4] text-[#54820b]">{{ 'condition.fixedForPerson' | t }}</small>
         }
