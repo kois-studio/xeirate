@@ -26,18 +26,34 @@ export class SessionsViewComponent {
     readonly workspace = input.required<Workspace>();
     readonly showSchedule = input(true);
     readonly section = signal<SessionSection>('calendar');
-
     readonly store = inject(WorkspaceService);
+    readonly selectedParticipantIds = signal<string[]>(
+        this.store.workspace().participants.map((participant) => participant.id),
+    );
+
     private readonly formBuilder = inject(FormBuilder);
     readonly form = this.formBuilder.nonNullable.group({ month: [this.store.month()] });
     readonly columnForm = this.formBuilder.nonNullable.group({ label: [''] });
     readonly weekdays = WEEKDAYS;
 
     startSession(): void {
-        this.store.startSession(this.form.controls.month.value);
+        this.store.startSession(this.form.controls.month.value, this.selectedParticipantIds());
         if (this.store.activeSession()) {
             this.section.set('coverage');
         }
+    }
+
+    isParticipantSelected(participantId: string): boolean {
+        return this.selectedParticipantIds().includes(participantId);
+    }
+
+    toggleParticipant(participantId: string): void {
+        const selected = this.selectedParticipantIds();
+        this.selectedParticipantIds.set(
+            selected.includes(participantId)
+                ? selected.filter((id) => id !== participantId)
+                : [...selected, participantId],
+        );
     }
 
     selectSession(sessionId: string): void {

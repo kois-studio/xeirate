@@ -298,7 +298,7 @@ export class WorkspaceService {
         this.notice.set(this.languageService.translate('notice.personRemoved'));
     }
 
-    startSession(month: string): void {
+    startSession(month: string, participantIds?: string[]): void {
         if (!isValidMonth(month)) {
             this.notice.set(this.languageService.translate('notice.invalidMonth'));
             return;
@@ -310,14 +310,24 @@ export class WorkspaceService {
             return;
         }
 
+        const selectedParticipantIds = (
+            participantIds ?? current.participants.map((participant) => participant.id)
+        ).filter((participantId) =>
+            current.participants.some((participant) => participant.id === participantId),
+        );
+        if (selectedParticipantIds.length === 0) {
+            this.notice.set(this.languageService.translate('notice.participantsRequired'));
+            return;
+        }
+
         const session = createSession({
             id: createIdentifier('session'),
             month,
-            participantIds: current.participants.map((participant) => participant.id),
+            participantIds: selectedParticipantIds,
             createdAt: new Date().toISOString(),
             scheduleConfig: createDefaultScheduleConfiguration(),
-            participantColumnEligibility: current.participants.map((participant) => ({
-                participantId: participant.id,
+            participantColumnEligibility: selectedParticipantIds.map((participantId) => ({
+                participantId,
                 columnIds: ['general'],
             })),
             schedule: null,

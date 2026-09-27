@@ -13,6 +13,15 @@
             <div class="grid gap-1"><label class="mb-1 block text-[0.73rem] font-medium" for="session-month">{{ 'sessions.newSession' | t }}</label><span class="text-[0.7rem] text-[#49616a]">{{ 'sessions.chooseMonth' | t }}</span></div>
             <input class="min-h-11 rounded border border-[#aebdb4] bg-[#fffdf8] px-3 py-2.5 text-[#162b36] outline-none focus-visible:outline-3 focus-visible:outline-[#e4ff69] focus-visible:outline-offset-3" id="session-month" formControlName="month" type="month" />
             <app-button buttonClass="inline-flex min-h-11 items-center justify-center gap-2 rounded-[0.4rem] bg-[#162b36] px-4 py-2.5 text-sm font-medium text-white transition-transform duration-150 hover:-translate-y-px hover:bg-[#24424e] active:scale-105" type="submit">{{ 'sessions.create' | t }} <span aria-hidden="true">→</span></app-button>
+            <fieldset class="col-span-full grid gap-2 border-t border-[#d8dfd9] pt-3">
+                <legend class="text-[0.73rem] font-medium">{{ 'sessions.selectPeople' | t }}</legend>
+                <p class="m-0 text-[0.7rem] leading-[1.4] text-[#49616a]">{{ 'sessions.selectPeopleHelp' | t }}</p>
+                <div class="flex flex-wrap gap-2">
+                    @for (participant of workspace().participants; track participant.id) {
+                        <app-button [ariaPressed]="isParticipantSelected(participant.id)" [buttonClass]="'rounded border px-2.5 py-2 text-xs transition-colors active:scale-105 ' + (isParticipantSelected(participant.id) ? 'border-[#162b36] bg-[#e4ff69] text-[#162b36]' : 'border-[#aebdb4] bg-[#fffdf8] text-[#49616a]')" (buttonClick)="toggleParticipant(participant.id)">{{ participant.alias }}</app-button>
+                    }
+                </div>
+            </fieldset>
         </form>
     }
 

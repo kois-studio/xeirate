@@ -90,6 +90,9 @@ const englishTranslations = {
     'sessions.newSession': 'New calendar',
     'sessions.chooseMonth': 'Choose the month for this schedule',
     'sessions.create': 'Create calendar',
+    'sessions.selectPeople': 'Who is participating this month?',
+    'sessions.selectPeopleHelp':
+        'Everyone is selected by default. Remove anyone who is not part of this calendar.',
     'sessions.sectionNavigation': 'Session setup sections',
     'sessions.sectionCalendar': 'Calendar',
     'sessions.sectionCalendarHelp': 'Choose the month',
@@ -218,6 +221,7 @@ const englishTranslations = {
     'notice.personRemoved': 'Person removed from the team and local sessions.',
     'notice.invalidMonth': 'Choose a valid month to start the session.',
     'notice.peopleRequired': 'Add at least one person before creating a session.',
+    'notice.participantsRequired': 'Select at least one person for this calendar.',
     'notice.sessionPrepared': 'Calendar for {month} prepared.',
     'notice.sessionPreparedWithFixed':
         'Calendar for {month} prepared with {count} reusable fixed condition(s).',
@@ -350,6 +354,9 @@ const spanishTranslations = {
     'sessions.newSession': 'Nuevo calendario',
     'sessions.chooseMonth': 'Elige el mes de este calendario',
     'sessions.create': 'Crear calendario',
+    'sessions.selectPeople': '¿Quién participa este mes?',
+    'sessions.selectPeopleHelp':
+        'Todas las personas están seleccionadas por defecto. Quita a quien no participe en este calendario.',
     'sessions.sectionNavigation': 'Secciones de configuración',
     'sessions.sectionCalendar': 'Calendario',
     'sessions.sectionCalendarHelp': 'Elige el mes',
@@ -478,6 +485,7 @@ const spanishTranslations = {
     'notice.personRemoved': 'Persona eliminada de la lista y de las sesiones locales.',
     'notice.invalidMonth': 'Elige un mes válido para empezar la sesión.',
     'notice.peopleRequired': 'Añade al menos una persona antes de crear una sesión.',
+    'notice.participantsRequired': 'Selecciona al menos una persona para este calendario.',
     'notice.sessionPrepared': 'Calendario de {month} preparado.',
     'notice.sessionPreparedWithFixed':
         'Calendario de {month} preparado con {count} condición(es) fija(s).',
