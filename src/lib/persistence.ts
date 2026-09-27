@@ -28,23 +28,7 @@ export type LoadResult =
 
 export type SaveResult = { status: 'saved' } | { status: 'unavailable' };
 
-export function loadWorkspace(storage: StorageLike | undefined): LoadResult {
-    if (!storage) {
-        return { status: 'empty', workspace: emptyWorkspace() };
-    }
-
-    let raw: string | null = null;
-    let key = STORAGE_KEY;
-    try {
-        raw = storage.getItem(STORAGE_KEY);
-        if (!raw) {
-            key = LEGACY_STORAGE_KEY;
-            raw = storage.getItem(LEGACY_STORAGE_KEY);
-        }
-    } catch {
-        return { status: 'empty', workspace: emptyWorkspace() };
-    }
-
+export function parseWorkspaceData(raw: string, key = STORAGE_KEY): LoadResult {
     if (!raw) {
         return { status: 'empty', workspace: emptyWorkspace() };
     }
@@ -104,6 +88,34 @@ export function loadWorkspace(storage: StorageLike | undefined): LoadResult {
     }
 }
 
+export function loadWorkspace(storage: StorageLike | undefined): LoadResult {
+    if (!storage) {
+        return { status: 'empty', workspace: emptyWorkspace() };
+    }
+
+    let raw: string | null = null;
+    let key = STORAGE_KEY;
+    try {
+        raw = storage.getItem(STORAGE_KEY);
+        if (!raw) {
+            key = LEGACY_STORAGE_KEY;
+            raw = storage.getItem(LEGACY_STORAGE_KEY);
+        }
+    } catch {
+        return { status: 'empty', workspace: emptyWorkspace() };
+    }
+
+    return parseWorkspaceData(raw ?? '', key);
+}
+
+export function serializeWorkspace(
+    workspace: Workspace,
+    updatedAt = new Date().toISOString(),
+): string {
+    const envelope: StorageEnvelope = { schemaVersion: 6, updatedAt, workspace };
+    return JSON.stringify(envelope, null, 2);
+}
+
 export function saveWorkspace(
     storage: StorageLike | undefined,
     workspace: Workspace,
@@ -113,14 +125,8 @@ export function saveWorkspace(
         return { status: 'unavailable' };
     }
 
-    const envelope: StorageEnvelope = {
-        schemaVersion: 6,
-        updatedAt,
-        workspace,
-    };
-
     try {
-        storage.setItem(STORAGE_KEY, JSON.stringify(envelope));
+        storage.setItem(STORAGE_KEY, serializeWorkspace(workspace, updatedAt));
         return { status: 'saved' };
     } catch {
         return { status: 'unavailable' };

@@ -27,6 +27,8 @@ import { formatScheduleForSharing } from '../../lib/export';
 import {
     clearWorkspace,
     loadWorkspace,
+    parseWorkspaceData,
+    serializeWorkspace,
     type StorageLike,
     saveWorkspace,
 } from '../../lib/persistence';
@@ -86,7 +88,8 @@ function kindTranslationKey(kind: ConditionKind): TranslationKey {
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceService {
-    private readonly storage: StorageLike | undefined = inject(DOCUMENT).defaultView?.localStorage;
+    private readonly document = inject(DOCUMENT);
+    private readonly storage: StorageLike | undefined = this.document.defaultView?.localStorage;
     private readonly languageService = inject(LanguageService);
 
     readonly workspace = signal<Workspace>(emptyWorkspace());
@@ -807,6 +810,48 @@ export class WorkspaceService {
 
     printSchedule(): void {
         window.print();
+    }
+
+    exportWorkspace(): void {
+        const blob = new Blob([serializeWorkspace(this.workspace())], {
+            type: 'application/json',
+        });
+        const url = URL.createObjectURL(blob);
+        const anchor = this.document.createElement('a');
+        anchor.href = url;
+        anchor.download = `xeirate-workspace-${currentMonth()}.json`;
+        anchor.click();
+        URL.revokeObjectURL(url);
+        this.notice.set(this.languageService.translate('notice.workspaceExported'));
+    }
+
+    async importWorkspace(file: File): Promise<void> {
+        const result = parseWorkspaceData(await file.text());
+        if (result.status === 'invalid' || result.status === 'empty') {
+            this.notice.set(this.languageService.translate('notice.workspaceImportInvalid'));
+            return;
+        }
+        const current = this.workspace();
+        if (
+            (current.participants.length > 0 || current.sessions.length > 0) &&
+            !window.confirm(this.languageService.translate('workspace.importConfirm'))
+        ) {
+            return;
+        }
+        this.workspace.set(result.workspace);
+        const activeMonth = this.activeSession()?.month;
+        if (activeMonth) {
+            this.month.set(activeMonth);
+        }
+        this.wizardStep.set('people');
+        saveWorkspace(this.storage, result.workspace);
+        this.notice.set(
+            this.languageService.translate(
+                result.status === 'migrated'
+                    ? 'notice.workspaceImportedMigrated'
+                    : 'notice.workspaceImported',
+            ),
+        );
     }
 
     async shareSchedule(): Promise<void> {

@@ -57,6 +57,12 @@
             <p class="m-0 flex min-h-6 items-center gap-2 text-xs text-[#49616a]" role="status" aria-live="polite"><span class="h-2 w-2 shrink-0 rounded-full bg-[#77a20c]" aria-hidden="true"></span>{{ store.notice() || ('workspace.defaultNotice' | t) }}</p>
             <app-button buttonClass="px-0 py-1 text-[0.68rem] font-medium text-[#162b36] underline-offset-4 hover:underline active:scale-105" (buttonClick)="store.resetWorkspace()">{{ 'workspace.reset' | t }}</app-button>
         </div>
+        <div class="flex flex-wrap items-center justify-end gap-2 border-t border-[#d8dfd9] pt-3 print:hidden">
+            <span class="mr-auto text-[0.7rem] text-[#49616a]">{{ 'workspace.backupHelp' | t }}</span>
+            <app-button buttonClass="min-h-10 rounded border border-[#aebdb4] px-3 py-2 text-xs font-medium text-[#162b36] hover:bg-[#fffdf8]" (buttonClick)="store.exportWorkspace()">{{ 'workspace.export' | t }}</app-button>
+            <input #workspaceImport class="hidden" type="file" accept="application/json,.json" (change)="importWorkspace($event)" />
+            <app-button buttonClass="min-h-10 rounded border border-[#aebdb4] px-3 py-2 text-xs font-medium text-[#162b36] hover:bg-[#fffdf8]" (buttonClick)="workspaceImport.click()">{{ 'workspace.import' | t }}</app-button>
+        </div>
     </div>
 </main>
 

@@ -103,4 +103,13 @@ export class WorkspacePage {
                     : this.store.translate('workspace.reviewPending');
         }
     }
+
+    importWorkspace(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0];
+        if (file) {
+            void this.store.importWorkspace(file);
+        }
+        input.value = '';
+    }
 }

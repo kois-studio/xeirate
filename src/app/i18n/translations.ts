@@ -73,6 +73,10 @@ const englishTranslations = {
     'workspace.reset': 'Delete local workspace',
     'workspace.resetConfirm': 'Delete all people and sessions saved in this browser?',
     'workspace.exampleConfirm': 'Replace this local workspace with the example data?',
+    'workspace.backupHelp': 'Keep a backup or move this workspace to another browser.',
+    'workspace.export': 'Export backup',
+    'workspace.import': 'Import backup',
+    'workspace.importConfirm': 'Replace this local workspace with the imported backup?',
     'workspace.savedInBrowser': 'Everything is saved in this browser.',
     'people.kicker': 'Permanent team',
     'people.title': 'People',
@@ -287,6 +291,11 @@ const englishTranslations = {
     'notice.proposalGenerated':
         'Proposal {attempt} generated. Review the alerts before sharing it.',
     'notice.proposalRestored': 'Previous proposal restored.',
+    'notice.workspaceExported': 'Workspace backup downloaded.',
+    'notice.workspaceImported': 'Workspace backup imported.',
+    'notice.workspaceImportedMigrated':
+        'Workspace backup imported and updated to the current format.',
+    'notice.workspaceImportInvalid': 'That backup is not a valid Xeirate workspace file.',
     'notice.exampleLoaded':
         'Anonymized example loaded. Review the conditions and generate a proposal.',
     'notice.proposalShared': 'Proposal shared.',
@@ -381,6 +390,10 @@ const spanishTranslations = {
     'workspace.reset': 'Borrar espacio local',
     'workspace.resetConfirm': '¿Borrar todas las personas y sesiones guardadas en este navegador?',
     'workspace.exampleConfirm': '¿Sustituir este espacio local por los datos del ejemplo?',
+    'workspace.backupHelp': 'Guarda una copia o mueve este espacio a otro navegador.',
+    'workspace.export': 'Exportar copia',
+    'workspace.import': 'Importar copia',
+    'workspace.importConfirm': '¿Sustituir este espacio local por la copia importada?',
     'workspace.savedInBrowser': 'Todo se guarda en este navegador.',
     'people.kicker': 'Equipo permanente',
     'people.title': 'Personas',
@@ -597,6 +610,10 @@ const spanishTranslations = {
     'notice.proposalGenerated':
         'Propuesta {attempt} generada. Revisa las alertas antes de compartirla.',
     'notice.proposalRestored': 'Propuesta anterior recuperada.',
+    'notice.workspaceExported': 'Copia del espacio descargada.',
+    'notice.workspaceImported': 'Copia del espacio importada.',
+    'notice.workspaceImportedMigrated': 'Copia importada y actualizada al formato actual.',
+    'notice.workspaceImportInvalid': 'La copia no es un archivo de espacio Xeirate válido.',
     'notice.exampleLoaded':
         'Ejemplo anonimizado cargado. Revisa las condiciones y genera una propuesta.',
     'notice.proposalShared': 'Propuesta compartida.',
