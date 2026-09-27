@@ -4,7 +4,7 @@
     </a>
     <div class="flex items-center gap-3">
         @if (workspace()) {
-            <a class="rounded-[0.35rem] border border-[#d8dfd9] bg-[#fffdf8]/70 px-3 py-2 text-[0.67rem] font-medium tracking-[0.13em] text-[#49616a] uppercase no-underline transition-transform duration-150 hover:border-[#aebdb4] hover:text-[#162b36] active:scale-105" href="/#como-funciona" [routerLink]="languageService.localizedUrl('/#como-funciona', languageService.language())">
+            <a class="rounded-[0.35rem] border border-[#d8dfd9] bg-[#fffdf8]/70 px-3 py-2 text-[0.67rem] font-medium tracking-[0.13em] text-[#49616a] uppercase no-underline transition-transform duration-150 hover:border-[#aebdb4] hover:text-[#162b36] active:scale-105 max-[760px]:hidden" href="/#como-funciona" [routerLink]="languageService.localizedUrl('/#como-funciona', languageService.language())">
                 {{ 'nav.howItWorks' | t }} <span class="text-[#162b36]" aria-hidden="true">↗</span>
             </a>
         } @else {
