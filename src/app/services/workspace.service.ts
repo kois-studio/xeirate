@@ -36,7 +36,7 @@ import { LanguageService } from './language.service';
 
 export type WizardStep = 'people' | 'conditions' | 'session' | 'proposal';
 export type ConditionScope = 'fixed' | 'session';
-export type EditableConditionKind = Exclude<ConditionKind, 'clarification'>;
+export type EditableConditionKind = ConditionKind;
 
 export type ConditionEditor = {
     conditionId: string | null;
@@ -75,6 +75,10 @@ function kindTranslationKey(kind: ConditionKind): TranslationKey {
             return 'condition.requirement';
         case 'preference':
             return 'condition.preference';
+        case 'availability':
+            return 'condition.availability';
+        case 'eligibility':
+            return 'condition.eligibility';
         case 'clarification':
             return 'condition.clarification';
     }
@@ -687,8 +691,13 @@ export class WorkspaceService {
         if (condition.kind === 'clarification') {
             return;
         }
-        const nextKind: EditableConditionKind =
-            condition.kind === 'restriction' ? 'preference' : 'restriction';
+        const kinds: EditableConditionKind[] = [
+            'restriction',
+            'preference',
+            'availability',
+            'eligibility',
+        ];
+        const nextKind = kinds[(kinds.indexOf(condition.kind) + 1) % kinds.length] ?? 'restriction';
         const nextCondition = {
             ...condition,
             kind: nextKind,

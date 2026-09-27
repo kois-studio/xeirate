@@ -184,6 +184,17 @@ export function generateSchedule({
             if (!eligibilityFor(session, participant.id, slot.column.id)) {
                 return false;
             }
+            const availabilityConditions = sessionConditions.filter(
+                (condition) =>
+                    condition.participantId === participant.id &&
+                    (condition.kind === 'availability' || condition.kind === 'eligibility'),
+            );
+            if (
+                availabilityConditions.length > 0 &&
+                !availabilityConditions.some((condition) => conditionApplies(condition, slot.date))
+            ) {
+                return false;
+            }
             if (
                 !session.scheduleConfig.allowMultipleAssignmentsPerDay &&
                 hasAssignmentOnDate(assignments, participant.id, slot.date)

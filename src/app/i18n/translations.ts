@@ -186,6 +186,8 @@ const englishTranslations = {
     'condition.chooseTypeHelp': 'Choose whether this is a hard limit or a preference.',
     'condition.requirement': 'Requirement',
     'condition.preference': 'Preference',
+    'condition.availability': 'Availability',
+    'condition.eligibility': 'Eligibility',
     'condition.clarification': 'Needs review',
     'condition.pending': 'Request pending clarification',
     'condition.change': 'Change to {kind}',
@@ -193,6 +195,12 @@ const englishTranslations = {
     'condition.editAction': 'Edit',
     'condition.requirementHelp': 'It cannot happen on the days you mark.',
     'condition.preferenceHelp': 'We will try to avoid or favor it when creating the proposal.',
+    'condition.availabilityHelp':
+        'This person can be assigned only on the dates or weekdays you mark.',
+    'condition.eligibilityHelp':
+        'Use this when the person is eligible for a specific recurring window.',
+    'condition.clarificationHelp':
+        'Keep the request visible for human review without changing the generator.',
     'condition.howToApply': 'How to apply it',
     'condition.tryAvoid': 'Try to avoid',
     'condition.tryAssign': 'Try to assign',
@@ -458,6 +466,8 @@ const spanishTranslations = {
     'condition.chooseTypeHelp': 'Elige si esto es un límite obligatorio o una preferencia.',
     'condition.requirement': 'Requisito',
     'condition.preference': 'Preferencia',
+    'condition.availability': 'Disponibilidad',
+    'condition.eligibility': 'Elegibilidad',
     'condition.clarification': 'Por aclarar',
     'condition.pending': 'Petición pendiente de aclaración',
     'condition.change': 'Cambiar a {kind}',
@@ -465,6 +475,12 @@ const spanishTranslations = {
     'condition.editAction': 'Editar',
     'condition.requirementHelp': 'No puede ocurrir en los días que marques.',
     'condition.preferenceHelp': 'Intentaremos evitarla o favorecerla al crear la propuesta.',
+    'condition.availabilityHelp':
+        'Esta persona solo puede asignarse en las fechas o días que marques.',
+    'condition.eligibilityHelp':
+        'Úsalo cuando la persona sea elegible para una franja recurrente concreta.',
+    'condition.clarificationHelp':
+        'Mantén visible la petición para revisarla sin cambiar el generador.',
     'condition.howToApply': 'Cómo aplicarla',
     'condition.tryAvoid': 'Intentar evitar',
     'condition.tryAssign': 'Intentar asignar',

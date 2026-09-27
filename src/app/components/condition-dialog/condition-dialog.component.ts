@@ -52,7 +52,7 @@ export class ConditionDialogComponent {
                         ? 'preference'
                         : condition.kind === 'restriction'
                           ? 'restriction'
-                          : ''
+                          : condition.kind
                     : '',
                 preferenceMode: condition?.preferenceMode ?? 'avoid',
                 startDate: condition?.startDate ?? '',

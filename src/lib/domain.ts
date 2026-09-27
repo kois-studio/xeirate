@@ -49,7 +49,7 @@ const conditionSchema = z
         id: identifierSchema,
         sessionId: identifierSchema.nullable(),
         participantId: identifierSchema,
-        kind: z.enum(['restriction', 'preference', 'clarification']),
+        kind: z.enum(['restriction', 'preference', 'availability', 'eligibility', 'clarification']),
         preferenceMode: z.enum(['avoid', 'prefer']).nullable(),
         startDate: dateSchema.nullable(),
         endDate: dateSchema.nullable(),
