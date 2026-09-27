@@ -40,4 +40,39 @@ export class WorkspacePage {
     stepNumber(step: WizardStep): number {
         return this.wizardSteps.findIndex((item) => item.id === step) + 1;
     }
+
+    isStepComplete(step: WizardStep): boolean {
+        const currentStepNumber = this.stepNumber(this.store.wizardStep());
+        return step === 'people'
+            ? this.store.workspace().participants.length > 0
+            : step === 'conditions'
+              ? currentStepNumber > this.stepNumber(step) ||
+                this.store.workspace().conditions.some((condition) => condition.sessionId === null)
+              : step === 'session'
+                ? Boolean(this.store.activeSession()) && currentStepNumber > this.stepNumber(step)
+                : Boolean(this.store.activeSchedule());
+    }
+
+    stepSummary(step: WizardStep): string {
+        switch (step) {
+            case 'people':
+                return this.store.translate('workspace.peopleSummary', {
+                    count: this.store.workspace().participants.length,
+                });
+            case 'conditions':
+                return this.store.translate('workspace.conditionsSummary', {
+                    count: this.store
+                        .workspace()
+                        .conditions.filter((condition) => condition.sessionId === null).length,
+                });
+            case 'session':
+                return this.store.activeSession()
+                    ? this.store.monthLabel(this.store.activeSession()?.month ?? '')
+                    : this.store.translate('workspace.notStarted');
+            case 'proposal':
+                return this.store.activeSchedule()
+                    ? this.store.translate('workspace.reviewReady')
+                    : this.store.translate('workspace.reviewPending');
+        }
+    }
 }
