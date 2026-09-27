@@ -171,6 +171,7 @@ const englishTranslations = {
     'schedule.readyBody':
         'Requirements are limits, preferences are signals, and requests needing clarification always stay visible.',
     'schedule.calendarDays': 'Days in {month}',
+    'schedule.columnsScroll': 'Swipe horizontally to see every coverage column.',
     'schedule.day': 'Day',
     'schedule.unassigned': 'Unassigned',
     'schedule.selectTitle': 'Select or create a session',
@@ -453,6 +454,7 @@ const spanishTranslations = {
     'schedule.readyBody':
         'Los requisitos son límites, las preferencias son señales y las peticiones por aclarar siempre quedan visibles.',
     'schedule.calendarDays': 'Días de {month}',
+    'schedule.columnsScroll': 'Desliza horizontalmente para ver todas las columnas de cobertura.',
     'schedule.day': 'Día',
     'schedule.unassigned': 'Sin asignar',
     'schedule.selectTitle': 'Selecciona o crea una sesión',
