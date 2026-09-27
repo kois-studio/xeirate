@@ -1,6 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { computed, effect, Injectable, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs';
 
 import {
     type Language,
@@ -27,13 +28,28 @@ export class LanguageService {
 
     constructor() {
         effect(() => {
-            const language = this.language();
-            this.document.documentElement.lang = language;
-            this.document.title = this.translate('landing.title');
-            this.document
-                .querySelector('meta[name="description"]')
-                ?.setAttribute('content', this.translate('landing.intro'));
+            this.language();
+            this.updateMetadata(this.router.url);
         });
+        this.router.events
+            .pipe(filter((event) => event instanceof NavigationEnd))
+            .subscribe((event) => this.updateMetadata(event.urlAfterRedirects));
+    }
+
+    private updateMetadata(url: string): void {
+        const workspaceRoute = url.split('?')[0]?.split('#')[0]?.endsWith('/app') ?? false;
+        this.document.documentElement.lang = this.language();
+        this.document.title = this.translate(
+            workspaceRoute ? 'workspace.metaTitle' : 'landing.metaTitle',
+        );
+        this.document
+            .querySelector('meta[name="description"]')
+            ?.setAttribute(
+                'content',
+                this.translate(
+                    workspaceRoute ? 'workspace.metaDescription' : 'landing.metaDescription',
+                ),
+            );
     }
 
     preferredLanguage(): Language {

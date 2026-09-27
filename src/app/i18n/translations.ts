@@ -19,6 +19,9 @@ const englishTranslations = {
     'nav.backToLanding': 'Back to the introduction',
     'landing.eyebrow': 'A workspace for coordinating the month',
     'landing.title': 'The month, made clearer.',
+    'landing.metaTitle': 'Xeirate · recurring schedules, made clearer',
+    'landing.metaDescription':
+        'Configure people, rules, and recurring coverage, then review a clear monthly schedule proposal in your browser.',
     'landing.intro':
         'Xeirate lets you define the rules of any recurring schedule, then turns requests and preferences into a monthly proposal you can review with your team.',
     'landing.formatsNote':
@@ -42,6 +45,9 @@ const englishTranslations = {
     'footer.calm': 'Made to prepare the month with a little more calm.',
     'workspace.kicker': 'Local workspace',
     'workspace.title': 'Prepare a schedule',
+    'workspace.metaTitle': 'Prepare a schedule · Xeirate',
+    'workspace.metaDescription':
+        'Set up people, conditions, coverage, and a reviewable schedule proposal in your local Xeirate workspace.',
     'workspace.localOnly': 'Only in this browser',
     'workspace.steps': 'Schedule setup steps',
     'workspace.stepPeople': 'People',
@@ -309,6 +315,9 @@ const spanishTranslations = {
     'nav.backToLanding': 'Volver a la presentación',
     'landing.eyebrow': 'Una mesa de trabajo para coordinar el mes',
     'landing.title': 'El mes, más claro.',
+    'landing.metaTitle': 'Xeirate · calendarios recurrentes, más claros',
+    'landing.metaDescription':
+        'Configura personas, reglas y coberturas recurrentes y revisa una propuesta mensual clara en tu navegador.',
     'landing.intro':
         'Xeirate te permite definir las reglas de cualquier calendario recurrente y convertir peticiones y preferencias en una propuesta mensual que puedes revisar con tu equipo.',
     'landing.formatsNote':
@@ -334,6 +343,9 @@ const spanishTranslations = {
     'footer.calm': 'Hecho para preparar el mes con un poco más de calma.',
     'workspace.kicker': 'Espacio local',
     'workspace.title': 'Prepara un calendario',
+    'workspace.metaTitle': 'Prepara un calendario · Xeirate',
+    'workspace.metaDescription':
+        'Configura personas, condiciones y coberturas y revisa una propuesta de calendario en tu espacio local de Xeirate.',
     'workspace.localOnly': 'Solo en este navegador',
     'workspace.steps': 'Pasos para preparar el calendario',
     'workspace.stepPeople': 'Personas',
