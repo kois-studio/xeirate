@@ -1,8 +1,9 @@
 import { Component, inject } from '@angular/core';
 
 import { getDaysInMonth, type ScheduleAssignment, type Session } from '../../../lib/domain';
+import type { TranslationKey } from '../../i18n/translations';
 import { TranslatePipe } from '../../pipes/translate.pipe';
-import { WorkspaceService } from '../../services/workspace.service';
+import { WEEKDAYS, WorkspaceService } from '../../services/workspace.service';
 import { AppButtonComponent } from '../button/button.component';
 
 @Component({
@@ -13,6 +14,7 @@ import { AppButtonComponent } from '../button/button.component';
 })
 export class ScheduleViewComponent {
     readonly store = inject(WorkspaceService);
+    readonly weekdayHeaders = WEEKDAYS;
 
     calendarDates(session: Session): string[] {
         return Array.from(
@@ -23,6 +25,17 @@ export class ScheduleViewComponent {
 
     dayNumber(date: string): number {
         return Number(date.slice(-2));
+    }
+
+    weekdayHeaderLabel(key: (typeof WEEKDAYS)[number]['key']): string {
+        return this.store.translate(`weekday.${key}` as TranslationKey);
+    }
+
+    leadingCalendarSlots(session: Session): string[] {
+        const firstDate = new Date(`${session.month}-01T12:00:00`);
+        const sundayBasedDay = firstDate.getDay();
+        const mondayBasedDay = sundayBasedDay === 0 ? 6 : sundayBasedDay - 1;
+        return Array.from({ length: mondayBasedDay }, (_, index) => `empty-${index}`);
     }
 
     assignmentAlias(participantId: string): string {

@@ -79,9 +79,15 @@
                 </table>
             </div>
         } @else {
-            <ul class="grid grid-cols-7 gap-1.5 p-0 max-[760px]:grid-cols-4 print:grid-cols-7" [attr.aria-label]="'schedule.calendarDays' | t:{ month: store.monthLabel(session.month) }">
+            <ul class="grid grid-cols-7 gap-1.5 p-0 max-[760px]:grid-cols-1 print:grid-cols-7" [attr.aria-label]="'schedule.calendarDays' | t:{ month: store.monthLabel(session.month) }">
+                @for (weekday of weekdayHeaders; track weekday.value) {
+                    <li class="p-1 text-center text-[0.58rem] font-medium text-[#aec2c5] uppercase max-[760px]:hidden print:text-black">{{ weekdayHeaderLabel(weekday.key) }}</li>
+                }
+                @for (slot of leadingCalendarSlots(session); track slot) {
+                    <li class="min-h-24 max-[760px]:hidden" aria-hidden="true"></li>
+                }
                 @for (date of calendarDates(session); track date) {
-                    <li class="flex min-h-24 flex-col border border-[#35515b] bg-[#1e3742] p-2 print:border-[#bbb] print:bg-white print:text-black">
+                    <li class="flex min-h-24 flex-col border border-[#35515b] bg-[#1e3742] p-2 max-[760px]:grid max-[760px]:min-h-16 max-[760px]:grid-cols-[3.25rem_minmax(0,1fr)] max-[760px]:items-center max-[760px]:gap-2 print:border-[#bbb] print:bg-white print:text-black">
                         <span class="text-[0.58rem] font-medium text-[#aec2c5] uppercase print:text-black">{{ store.calendarWeekdayLabel(date) }}</span>
                         <span class="mt-1 font-serif text-xl leading-none text-white print:text-black">{{ dayNumber(date) }}</span>
                         @if (assignmentsForDate(date).length > 0) {
