@@ -33,6 +33,9 @@
                         }
                     </div>
                     <span class="mt-2 block text-[0.68rem] text-[#49616a]">{{ store.weekdaysSelectionLabel(form.controls.weekdays.value) }}</span>
+                    @if (form.controls.weekdays.value.length === 0) {
+                        <p class="mt-2 mb-0 text-xs font-medium text-[#8e4938]" role="alert">{{ 'condition.weekdayRequired' | t }}</p>
+                    }
                 </fieldset>
             } @else {
                 <fieldset class="grid grid-cols-2 gap-2.5 max-[760px]:grid-cols-1">
@@ -52,7 +55,7 @@
                 }
                 <div class="flex gap-2 max-[560px]:flex-col">
                     <app-button buttonClass="inline-flex min-h-11 items-center justify-center rounded-[0.4rem] border border-[#aebdb4] px-4 py-2.5 text-sm font-medium text-[#162b36] transition-transform duration-150 hover:bg-[#fffdf8] active:scale-105" (buttonClick)="store.closeConditionEditor()">{{ 'condition.cancel' | t }}</app-button>
-                    <app-button [disabled]="!form.controls.kind.value" buttonClass="inline-flex min-h-11 items-center justify-center rounded-[0.4rem] bg-[#162b36] px-4 py-2.5 text-sm font-medium text-white transition-transform duration-150 hover:-translate-y-px hover:bg-[#24424e] active:scale-105 disabled:cursor-not-allowed disabled:opacity-50" type="submit">{{ 'condition.save' | t }}</app-button>
+                    <app-button [disabled]="!form.controls.kind.value || (isFixed() && form.controls.weekdays.value.length === 0)" buttonClass="inline-flex min-h-11 items-center justify-center rounded-[0.4rem] bg-[#162b36] px-4 py-2.5 text-sm font-medium text-white transition-transform duration-150 hover:-translate-y-px hover:bg-[#24424e] active:scale-105 disabled:cursor-not-allowed disabled:opacity-50" type="submit">{{ 'condition.save' | t }}</app-button>
                 </div>
             </div>
         </form>

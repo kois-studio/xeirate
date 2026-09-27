@@ -90,13 +90,19 @@ export class ConditionDialogComponent {
     }
 
     save(): void {
-        if (this.form.invalid || !this.form.controls.kind.value) {
+        if (
+            this.form.invalid ||
+            !this.form.controls.kind.value ||
+            (this.isFixed() && this.form.controls.weekdays.value.length === 0)
+        ) {
             this.form.controls.note.markAsTouched();
             this.store.notice.set(
                 this.languageService.translate(
-                    this.form.controls.kind.value
-                        ? 'notice.noteRequired'
-                        : 'notice.conditionTypeRequired',
+                    this.isFixed() && this.form.controls.weekdays.value.length === 0
+                        ? 'notice.weekdayRequired'
+                        : this.form.controls.kind.value
+                          ? 'notice.noteRequired'
+                          : 'notice.conditionTypeRequired',
                 ),
             );
             return;
