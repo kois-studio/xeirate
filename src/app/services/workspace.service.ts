@@ -16,6 +16,7 @@ import {
     type Participant,
     type ScheduleColumn,
     type ScheduleConfiguration,
+    type Schedule,
     type PreferenceMode,
     type ScheduleIssue,
     type Session,
@@ -90,6 +91,7 @@ export class WorkspaceService {
     readonly notice = signal('');
     readonly storageReady = signal(false);
     readonly editor = signal<ConditionEditor | null>(null);
+    private readonly proposalHistory = signal<Record<string, Schedule[]>>({});
 
     readonly activeSession = computed<Session | undefined>(() =>
         this.workspace().sessions.find(
@@ -124,6 +126,10 @@ export class WorkspaceService {
     });
 
     readonly activeSchedule = computed(() => this.activeSession()?.schedule ?? null);
+    readonly activeProposalHistory = computed<Schedule[]>(() => {
+        const activeSessionId = this.activeSession()?.id;
+        return activeSessionId ? (this.proposalHistory()[activeSessionId] ?? []) : [];
+    });
     readonly scheduleAssignments = computed(
         () =>
             this.activeSchedule()?.assignments.reduce((byDate, assignment) => {
@@ -725,6 +731,9 @@ export class WorkspaceService {
             conditions: this.activeConditions(),
             attempt: nextAttempt,
         });
+        if (session.schedule) {
+            this.rememberProposal(session.id, session.schedule);
+        }
         this.workspace.update((current) => ({
             ...current,
             sessions: current.sessions.map((item) =>
@@ -738,6 +747,34 @@ export class WorkspaceService {
                       attempt: nextAttempt,
                   }),
         );
+    }
+
+    restoreProposal(schedule: Schedule): void {
+        const session = this.activeSession();
+        if (!session) {
+            return;
+        }
+        if (session.schedule) {
+            this.rememberProposal(session.id, session.schedule);
+        }
+        this.workspace.update((current) => ({
+            ...current,
+            sessions: current.sessions.map((item) =>
+                item.id === session.id ? { ...item, schedule } : item,
+            ),
+        }));
+        this.notice.set(this.languageService.translate('notice.proposalRestored'));
+    }
+
+    private rememberProposal(sessionId: string, schedule: Schedule): void {
+        this.proposalHistory.update((history) => {
+            const existing = history[sessionId] ?? [];
+            const next = [
+                schedule,
+                ...existing.filter((item) => item.attempt !== schedule.attempt),
+            ];
+            return { ...history, [sessionId]: next.slice(0, 5) };
+        });
     }
 
     loadDemo(): void {

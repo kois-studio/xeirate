@@ -164,6 +164,9 @@ const englishTranslations = {
     'schedule.noAlerts': 'There are no alerts in this proposal.',
     'schedule.share': 'Share proposal',
     'schedule.print': 'Print / PDF',
+    'schedule.previousProposals': 'Previous proposals',
+    'schedule.previousProposal': 'Proposal {attempt} · {assignments} assignments',
+    'schedule.restore': 'Restore',
     'schedule.readyTitle': 'Ready to generate a proposal.',
     'schedule.readyBody':
         'Requirements are limits, preferences are signals, and requests needing clarification always stay visible.',
@@ -246,6 +249,7 @@ const englishTranslations = {
     'notice.proposalNeedsReview': 'Proposal generated with days still needing resolution.',
     'notice.proposalGenerated':
         'Proposal {attempt} generated. Review the alerts before sharing it.',
+    'notice.proposalRestored': 'Previous proposal restored.',
     'notice.exampleLoaded':
         'Anonymized example loaded. Review the conditions and generate a proposal.',
     'notice.proposalShared': 'Proposal shared.',
@@ -432,6 +436,9 @@ const spanishTranslations = {
     'schedule.noAlerts': 'No hay alertas en esta propuesta.',
     'schedule.share': 'Compartir propuesta',
     'schedule.print': 'Imprimir / PDF',
+    'schedule.previousProposals': 'Propuestas anteriores',
+    'schedule.previousProposal': 'Propuesta {attempt} · {assignments} asignaciones',
+    'schedule.restore': 'Recuperar',
     'schedule.readyTitle': 'Lista para generar una propuesta.',
     'schedule.readyBody':
         'Los requisitos son límites, las preferencias son señales y las peticiones por aclarar siempre quedan visibles.',
@@ -514,6 +521,7 @@ const spanishTranslations = {
     'notice.proposalNeedsReview': 'Propuesta generada con días pendientes de resolver.',
     'notice.proposalGenerated':
         'Propuesta {attempt} generada. Revisa las alertas antes de compartirla.',
+    'notice.proposalRestored': 'Propuesta anterior recuperada.',
     'notice.exampleLoaded':
         'Ejemplo anonimizado cargado. Revisa las condiciones y genera una propuesta.',
     'notice.proposalShared': 'Propuesta compartida.',
