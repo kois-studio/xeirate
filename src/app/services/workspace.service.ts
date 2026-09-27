@@ -267,6 +267,17 @@ export class WorkspaceService {
     }
 
     removeParticipant(participantId: string): void {
+        const participant = this.workspace().participants.find((item) => item.id === participantId);
+        if (
+            participant &&
+            !window.confirm(
+                this.languageService.translate('people.deleteConfirm', {
+                    name: participant.alias,
+                }),
+            )
+        ) {
+            return;
+        }
         this.workspace.update((current) => ({
             ...current,
             participants: current.participants.filter(
@@ -591,6 +602,12 @@ export class WorkspaceService {
 
     removeCondition(conditionId: string): void {
         const condition = this.workspace().conditions.find((item) => item.id === conditionId);
+        if (
+            condition &&
+            !window.confirm(this.languageService.translate('condition.deleteConfirm'))
+        ) {
+            return;
+        }
         this.workspace.update((current) => ({
             ...current,
             conditions: current.conditions.filter((item) => item.id !== conditionId),
@@ -671,6 +688,13 @@ export class WorkspaceService {
     }
 
     loadDemo(): void {
+        const current = this.workspace();
+        if (
+            (current.participants.length > 0 || current.sessions.length > 0) &&
+            !window.confirm(this.languageService.translate('workspace.exampleConfirm'))
+        ) {
+            return;
+        }
         this.workspace.set(createDemoWorkspace(this.languageService.language()));
         this.month.set('2026-11');
         this.wizardStep.set('session');
