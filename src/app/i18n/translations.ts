@@ -157,6 +157,7 @@ const englishTranslations = {
     'condition.dialogIntro':
         'Decide what this request means for the calendar. You can always change it later.',
     'condition.type': 'Condition type',
+    'condition.chooseTypeHelp': 'Choose whether this is a hard limit or a preference.',
     'condition.requirement': 'Requirement',
     'condition.preference': 'Preference',
     'condition.clarification': 'Needs review',
@@ -201,6 +202,7 @@ const englishTranslations = {
     'notice.sessionPreparedWithFixed':
         'Session for {month} prepared with {count} reusable fixed condition(s).',
     'notice.noteRequired': 'Write a note to explain the request.',
+    'notice.conditionTypeRequired': 'Choose a condition type before saving.',
     'notice.sessionRequired': 'Prepare a session before adding monthly conditions.',
     'notice.endDateInvalid': 'The end date cannot be before the start date.',
     'notice.conditionUpdated': 'Condition updated.',
@@ -394,6 +396,7 @@ const spanishTranslations = {
     'condition.dialogIntro':
         'Decide qué significa esta petición para el calendario. Siempre podrás cambiarla después.',
     'condition.type': 'Tipo de condición',
+    'condition.chooseTypeHelp': 'Elige si esto es un límite obligatorio o una preferencia.',
     'condition.requirement': 'Requisito',
     'condition.preference': 'Preferencia',
     'condition.clarification': 'Por aclarar',
@@ -438,6 +441,7 @@ const spanishTranslations = {
     'notice.sessionPreparedWithFixed':
         'Sesión de {month} preparada con {count} condición(es) fija(s).',
     'notice.noteRequired': 'Escribe una nota para explicar la petición.',
+    'notice.conditionTypeRequired': 'Elige un tipo de condición antes de guardar.',
     'notice.sessionRequired': 'Prepara una sesión antes de añadir condiciones para el mes.',
     'notice.endDateInvalid': 'La fecha final no puede ser anterior a la fecha inicial.',
     'notice.conditionUpdated': 'Condición actualizada.',

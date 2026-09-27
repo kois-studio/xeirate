@@ -16,7 +16,7 @@
                     <app-button [ariaPressed]="form.controls.kind.value === 'restriction'" [buttonClass]="'min-h-10 rounded border px-3 py-2 text-sm font-medium transition-transform duration-150 active:scale-105 ' + (form.controls.kind.value === 'restriction' ? 'border-[#162b36] bg-[#e4ff69] text-[#162b36]' : 'border-[#aebdb4] bg-[#fffdf8] text-[#49616a]')" (buttonClick)="form.controls.kind.setValue('restriction')">{{ 'condition.requirement' | t }}</app-button>
                     <app-button [ariaPressed]="form.controls.kind.value === 'preference'" [buttonClass]="'min-h-10 rounded border px-3 py-2 text-sm font-medium transition-transform duration-150 active:scale-105 ' + (form.controls.kind.value === 'preference' ? 'border-[#162b36] bg-[#e4ff69] text-[#162b36]' : 'border-[#aebdb4] bg-[#fffdf8] text-[#49616a]')" (buttonClick)="form.controls.kind.setValue('preference')">{{ 'condition.preference' | t }}</app-button>
                 </div>
-                <p class="mt-2 mb-0 text-[0.7rem] leading-[1.4] text-[#49616a]">{{ form.controls.kind.value === 'restriction' ? ('condition.requirementHelp' | t) : ('condition.preferenceHelp' | t) }}</p>
+                <p class="mt-2 mb-0 text-[0.7rem] leading-[1.4] text-[#49616a]">{{ form.controls.kind.value === 'restriction' ? ('condition.requirementHelp' | t) : form.controls.kind.value === 'preference' ? ('condition.preferenceHelp' | t) : ('condition.chooseTypeHelp' | t) }}</p>
             </fieldset>
 
             @if (form.controls.kind.value === 'preference') {
@@ -52,7 +52,7 @@
                 }
                 <div class="flex gap-2 max-[560px]:flex-col">
                     <app-button buttonClass="inline-flex min-h-11 items-center justify-center rounded-[0.4rem] border border-[#aebdb4] px-4 py-2.5 text-sm font-medium text-[#162b36] transition-transform duration-150 hover:bg-[#fffdf8] active:scale-105" (buttonClick)="store.closeConditionEditor()">{{ 'condition.cancel' | t }}</app-button>
-                    <app-button buttonClass="inline-flex min-h-11 items-center justify-center rounded-[0.4rem] bg-[#162b36] px-4 py-2.5 text-sm font-medium text-white transition-transform duration-150 hover:-translate-y-px hover:bg-[#24424e] active:scale-105" type="submit">{{ 'condition.save' | t }}</app-button>
+                    <app-button [disabled]="!form.controls.kind.value" buttonClass="inline-flex min-h-11 items-center justify-center rounded-[0.4rem] bg-[#162b36] px-4 py-2.5 text-sm font-medium text-white transition-transform duration-150 hover:-translate-y-px hover:bg-[#24424e] active:scale-105 disabled:cursor-not-allowed disabled:opacity-50" type="submit">{{ 'condition.save' | t }}</app-button>
                 </div>
             </div>
         </form>

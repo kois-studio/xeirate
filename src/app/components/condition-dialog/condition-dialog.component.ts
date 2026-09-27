@@ -29,7 +29,7 @@ export class ConditionDialogComponent {
     readonly weekdays = WEEKDAYS;
     private readonly formBuilder = inject(FormBuilder);
     readonly form = this.formBuilder.nonNullable.group({
-        kind: this.formBuilder.nonNullable.control<EditableConditionKind>('restriction'),
+        kind: this.formBuilder.nonNullable.control<EditableConditionKind | ''>(''),
         preferenceMode: this.formBuilder.nonNullable.control<'avoid' | 'prefer'>('avoid'),
         startDate: this.formBuilder.nonNullable.control(''),
         endDate: this.formBuilder.nonNullable.control(''),
@@ -47,7 +47,13 @@ export class ConditionDialogComponent {
                 ? this.store.workspace().conditions.find((item) => item.id === editor.conditionId)
                 : undefined;
             this.form.reset({
-                kind: condition?.kind === 'preference' ? 'preference' : 'restriction',
+                kind: condition
+                    ? condition.kind === 'preference'
+                        ? 'preference'
+                        : condition.kind === 'restriction'
+                          ? 'restriction'
+                          : ''
+                    : '',
                 preferenceMode: condition?.preferenceMode ?? 'avoid',
                 startDate: condition?.startDate ?? '',
                 endDate: condition?.endDate ?? '',
@@ -84,12 +90,21 @@ export class ConditionDialogComponent {
     }
 
     save(): void {
-        if (this.form.invalid) {
+        if (this.form.invalid || !this.form.controls.kind.value) {
             this.form.controls.note.markAsTouched();
-            this.store.notice.set(this.languageService.translate('notice.noteRequired'));
+            this.store.notice.set(
+                this.languageService.translate(
+                    this.form.controls.kind.value
+                        ? 'notice.noteRequired'
+                        : 'notice.conditionTypeRequired',
+                ),
+            );
             return;
         }
-        this.store.saveCondition(this.form.getRawValue() as ConditionDraft);
+        this.store.saveCondition({
+            ...this.form.getRawValue(),
+            kind: this.form.controls.kind.value as EditableConditionKind,
+        } as ConditionDraft);
     }
 
     remove(): void {
