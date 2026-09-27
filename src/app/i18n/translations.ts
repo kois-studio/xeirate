@@ -164,6 +164,10 @@ const englishTranslations = {
     'schedule.fairnessExplainer':
         'Fairness: each person has between {min} and {max} assignments (maximum difference {difference}). Preferences missed: {preferences}.',
     'schedule.alerts': 'Proposal alerts',
+    'schedule.reviewTitle': 'Ready to share?',
+    'schedule.reviewAlerts': 'I reviewed every alert and understand what still needs a decision.',
+    'schedule.reviewCoverage': 'I checked the coverage totals and fairness before sharing.',
+    'schedule.reviewReady': 'Reviewed and ready to share.',
     'schedule.moreAlerts': 'And {count} more alert(s) in the shareable text.',
     'schedule.noAlerts': 'There are no alerts in this proposal.',
     'schedule.share': 'Share proposal',
@@ -451,6 +455,11 @@ const spanishTranslations = {
     'schedule.fairnessExplainer':
         'Reparto: cada persona tiene entre {min} y {max} asignaciones (diferencia máxima {difference}). Preferencias no respetadas: {preferences}.',
     'schedule.alerts': 'Alertas de la propuesta',
+    'schedule.reviewTitle': '¿Lista para compartir?',
+    'schedule.reviewAlerts':
+        'He revisado todas las alertas y entiendo qué decisiones quedan pendientes.',
+    'schedule.reviewCoverage': 'He comprobado la cobertura y el reparto antes de compartirla.',
+    'schedule.reviewReady': 'Revisada y lista para compartir.',
     'schedule.moreAlerts': 'Y {count} alerta(s) más en el texto compartible.',
     'schedule.noAlerts': 'No hay alertas en esta propuesta.',
     'schedule.share': 'Compartir propuesta',

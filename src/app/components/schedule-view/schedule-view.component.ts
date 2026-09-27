@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 
 import { getDaysInMonth, type ScheduleAssignment, type Session } from '../../../lib/domain';
 import { countCoverageSlots } from '../../../lib/scheduler';
@@ -16,6 +16,27 @@ import { AppButtonComponent } from '../button/button.component';
 export class ScheduleViewComponent {
     readonly store = inject(WorkspaceService);
     readonly weekdayHeaders = WEEKDAYS;
+    readonly reviewChecks = signal({ alerts: false, coverage: false });
+    readonly reviewReady = computed(() => {
+        const checks = this.reviewChecks();
+        return checks.alerts && checks.coverage;
+    });
+
+    constructor() {
+        let lastAttempt: number | null = null;
+        effect(() => {
+            const attempt = this.store.activeSchedule()?.attempt ?? null;
+            if (attempt === lastAttempt) {
+                return;
+            }
+            lastAttempt = attempt;
+            this.reviewChecks.set({ alerts: false, coverage: false });
+        });
+    }
+
+    setReviewCheck(key: 'alerts' | 'coverage', checked: boolean): void {
+        this.reviewChecks.update((current) => ({ ...current, [key]: checked }));
+    }
 
     calendarDates(session: Session): string[] {
         return Array.from(

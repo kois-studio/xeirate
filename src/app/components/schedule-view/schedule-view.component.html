@@ -33,8 +33,16 @@
             } @else {
                 <p class="mb-4 bg-[#2d505d] p-3 text-[0.74rem] leading-[1.45] text-[#d9edef] print:hidden">{{ 'schedule.noAlerts' | t }}</p>
             }
+            <fieldset class="mb-5 grid gap-2 border border-[#35515b] bg-[#213b47] p-3 print:hidden">
+                <legend class="px-1 text-sm font-medium text-white">{{ 'schedule.reviewTitle' | t }}</legend>
+                <label class="flex items-start gap-2 text-[0.74rem] leading-[1.45] text-[#aec2c5]"><input class="mt-0.5 h-4 w-4 shrink-0 accent-[#e4ff69]" type="checkbox" [checked]="reviewChecks().alerts" (change)="setReviewCheck('alerts', $any($event.target).checked)" /> <span>{{ 'schedule.reviewAlerts' | t }}</span></label>
+                <label class="flex items-start gap-2 text-[0.74rem] leading-[1.45] text-[#aec2c5]"><input class="mt-0.5 h-4 w-4 shrink-0 accent-[#e4ff69]" type="checkbox" [checked]="reviewChecks().coverage" (change)="setReviewCheck('coverage', $any($event.target).checked)" /> <span>{{ 'schedule.reviewCoverage' | t }}</span></label>
+                @if (reviewReady()) {
+                    <p class="m-0 text-xs font-medium text-[#e4ff69]">{{ 'schedule.reviewReady' | t }}</p>
+                }
+            </fieldset>
             <div class="mb-5 flex flex-wrap gap-2 print:hidden">
-                <app-button buttonClass="inline-flex min-h-11 items-center justify-center gap-2 rounded-[0.4rem] bg-[#e4ff69] px-4 py-2.5 text-sm font-medium text-[#162b36] transition-transform duration-150 hover:-translate-y-px active:scale-105" (buttonClick)="store.shareSchedule()">{{ 'schedule.share' | t }}</app-button>
+                <app-button [disabled]="!reviewReady()" buttonClass="inline-flex min-h-11 items-center justify-center gap-2 rounded-[0.4rem] bg-[#e4ff69] px-4 py-2.5 text-sm font-medium text-[#162b36] transition-transform duration-150 hover:-translate-y-px active:scale-105 disabled:cursor-not-allowed disabled:opacity-50" (buttonClick)="store.shareSchedule()">{{ 'schedule.share' | t }}</app-button>
                 <app-button buttonClass="inline-flex min-h-11 items-center justify-center gap-2 rounded-[0.4rem] border border-[#60737b] px-4 py-2.5 text-sm font-medium text-white transition-transform duration-150 hover:border-[#e4ff69] hover:bg-[#233b46] active:scale-105" (buttonClick)="store.printSchedule()">{{ 'schedule.print' | t }}</app-button>
             </div>
             @if (store.activeProposalHistory().length > 0) {
