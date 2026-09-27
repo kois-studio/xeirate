@@ -109,13 +109,25 @@ export class SessionsViewComponent {
     }
 
     columnPreview(column: ScheduleColumn): string {
-        return this.store.translate('sessions.columnPreview', {
-            people: column.requiredPeople,
-            days: this.store.weekdaysSelectionLabel(column.weekdays),
-            interval: column.intervalDays,
-            hours: column.shiftDurationHours ?? '—',
-            rest: column.restDaysAfterAssignment,
-        });
+        const people = this.store.translate(
+            column.requiredPeople === 1
+                ? 'sessions.columnPeople.one'
+                : 'sessions.columnPeople.other',
+            { count: column.requiredPeople },
+        );
+        const interval = this.store.translate(
+            column.intervalDays === 1
+                ? 'sessions.columnInterval.one'
+                : 'sessions.columnInterval.other',
+            { count: column.intervalDays },
+        );
+        const rest = this.store.translate(
+            column.restDaysAfterAssignment === 1
+                ? 'sessions.columnRest.one'
+                : 'sessions.columnRest.other',
+            { count: column.restDaysAfterAssignment },
+        );
+        return `${people} · ${this.store.weekdaysSelectionLabel(column.weekdays)} · ${interval} · ${column.shiftDurationHours ?? '—'} h · ${rest}`;
     }
 
     trackColumn(_index: number, column: ScheduleColumn): string {

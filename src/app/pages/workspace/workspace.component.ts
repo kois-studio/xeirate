@@ -74,15 +74,25 @@ export class WorkspacePage {
     stepSummary(step: WizardStep): string {
         switch (step) {
             case 'people':
-                return this.store.translate('workspace.peopleSummary', {
-                    count: this.store.workspace().participants.length,
-                });
-            case 'conditions':
-                return this.store.translate('workspace.conditionsSummary', {
-                    count: this.store
-                        .workspace()
-                        .conditions.filter((condition) => condition.sessionId === null).length,
-                });
+                return this.store.translate(
+                    this.store.workspace().participants.length === 1
+                        ? 'workspace.peopleSummary.one'
+                        : 'workspace.peopleSummary.other',
+                    {
+                        count: this.store.workspace().participants.length,
+                    },
+                );
+            case 'conditions': {
+                const count = this.store
+                    .workspace()
+                    .conditions.filter((condition) => condition.sessionId === null).length;
+                return this.store.translate(
+                    count === 1
+                        ? 'workspace.conditionsSummary.one'
+                        : 'workspace.conditionsSummary.other',
+                    { count },
+                );
+            }
             case 'session':
                 return this.store.activeSession()
                     ? this.store.monthLabel(this.store.activeSession()?.month ?? '')

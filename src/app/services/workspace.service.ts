@@ -387,10 +387,15 @@ export class WorkspaceService {
         this.wizardStep.set('session');
         this.notice.set(
             oldReusableConditions.length > 0
-                ? this.languageService.translate('notice.sessionPreparedWithFixed', {
-                      month: this.monthLabel(month),
-                      count: oldReusableConditions.length,
-                  })
+                ? this.languageService.translate(
+                      oldReusableConditions.length === 1
+                          ? 'notice.sessionPreparedWithFixed.one'
+                          : 'notice.sessionPreparedWithFixed.other',
+                      {
+                          month: this.monthLabel(month),
+                          count: oldReusableConditions.length,
+                      },
+                  )
                 : this.languageService.translate('notice.sessionPrepared', {
                       month: this.monthLabel(month),
                   }),

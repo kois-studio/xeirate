@@ -125,7 +125,7 @@
                         <section class="border border-[#d8dfd9] bg-[#fffdf8] p-5 print:hidden" aria-labelledby="session-detail-title">
                         <div class="flex items-start justify-between gap-4">
                             <div><p class="mb-3 text-[0.67rem] font-medium tracking-[0.13em] text-[#49616a] uppercase">{{ 'sessions.active' | t }}</p><h2 id="session-detail-title" class="mb-2 font-serif text-[clamp(2rem,5vw,3rem)] leading-[0.95] tracking-[-0.075em]">{{ 'sessions.requestsFor' | t:{ month: store.monthLabel(activeSession.month) } }}</h2></div>
-                            <span class="shrink-0 border border-[#aebdb4] bg-[#f4f3ed] px-2.5 py-2 text-[0.67rem] text-[#49616a]">{{ 'sessions.conditionCount' | t:{ count: store.activeConditions().length } }}</span>
+                            <span class="shrink-0 border border-[#aebdb4] bg-[#f4f3ed] px-2.5 py-2 text-[0.67rem] text-[#49616a]">{{ (store.activeConditions().length === 1 ? 'sessions.conditionCount.one' : 'sessions.conditionCount.other') | t:{ count: store.activeConditions().length } }}</span>
                         </div>
                         <p class="max-w-[38rem] text-[0.87rem] leading-[1.55] text-[#49616a]">{{ 'sessions.reviewRequests' | t }}</p>
                         <div class="grid gap-3">
@@ -133,7 +133,7 @@
                                 <article class="border border-[#d8dfd9] bg-[#fffdf8] p-4">
                                     <div class="flex items-center justify-between gap-4">
                                         <div class="flex min-w-0 items-center gap-2.5"><span class="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-[#aebdb4] bg-[#e4f0f1] text-xs font-medium" aria-hidden="true">{{ participant.alias.slice(0, 1).toUpperCase() }}</span><h3 class="m-0 font-serif text-base tracking-[-0.04em]">{{ participant.alias }}</h3></div>
-                                        <span class="text-[0.67rem] text-[#49616a]">{{ 'sessions.requestCount' | t:{ count: store.participantConditions(participant.id).length } }}</span>
+                                        <span class="text-[0.67rem] text-[#49616a]">{{ (store.participantConditions(participant.id).length === 1 ? 'sessions.requestCount.one' : 'sessions.requestCount.other') | t:{ count: store.participantConditions(participant.id).length } }}</span>
                                     </div>
                                     @if (store.participantConditions(participant.id).length > 0) {
                                         <ul class="mt-4 grid gap-2 p-0">

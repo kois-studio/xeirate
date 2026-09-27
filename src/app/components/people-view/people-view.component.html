@@ -26,7 +26,7 @@
                             <div class="grid gap-1">
                                 <h3 class="m-0 font-serif text-base tracking-[-0.04em]">{{ participant.alias }}</h3>
                                 @if (mode() === 'conditions') {
-                                    <span class="text-[0.67rem] text-[#49616a]">{{ store.fixedConditions(participant.id).length === 0 ? ('people.noFixedConditions' | t) : ('people.fixedConditionCount.other' | t:{ count: store.fixedConditions(participant.id).length }) }}</span>
+                                    <span class="text-[0.67rem] text-[#49616a]">{{ store.fixedConditions(participant.id).length === 0 ? ('people.noFixedConditions' | t) : (store.fixedConditions(participant.id).length === 1 ? ('people.fixedConditionCount.one' | t:{ count: 1 }) : ('people.fixedConditionCount.other' | t:{ count: store.fixedConditions(participant.id).length })) }}</span>
                                 }
                             </div>
                         </div>
