@@ -309,6 +309,20 @@ export class WorkspaceService {
             this.wizardStep.set('people');
             return;
         }
+        const existingSession = current.sessions.find((session) => session.month === month);
+        if (existingSession) {
+            this.workspace.update((currentWorkspace) => ({
+                ...currentWorkspace,
+                activeSessionId: existingSession.id,
+            }));
+            this.wizardStep.set('session');
+            this.notice.set(
+                this.languageService.translate('notice.calendarExists', {
+                    month: this.monthLabel(month),
+                }),
+            );
+            return;
+        }
 
         const selectedParticipantIds = (
             participantIds ?? current.participants.map((participant) => participant.id)
@@ -381,6 +395,35 @@ export class WorkspaceService {
         this.workspace.update((current) => ({ ...current, activeSessionId: sessionId }));
         this.month.set(session.month);
         this.wizardStep.set('session');
+    }
+
+    deleteSession(sessionId: string): void {
+        const session = this.workspace().sessions.find((item) => item.id === sessionId);
+        if (
+            !session ||
+            !window.confirm(
+                this.languageService.translate('sessions.deleteConfirm', {
+                    month: this.monthLabel(session.month),
+                }),
+            )
+        ) {
+            return;
+        }
+        this.workspace.update((current) => {
+            const sessions = current.sessions.filter((item) => item.id !== sessionId);
+            return {
+                ...current,
+                sessions,
+                activeSessionId:
+                    current.activeSessionId === sessionId
+                        ? (sessions[0]?.id ?? null)
+                        : current.activeSessionId,
+                conditions: current.conditions.filter(
+                    (condition) => condition.sessionId !== sessionId,
+                ),
+            };
+        });
+        this.notice.set(this.languageService.translate('notice.calendarDeleted'));
     }
 
     activeScheduleConfiguration(): ScheduleConfiguration | undefined {
