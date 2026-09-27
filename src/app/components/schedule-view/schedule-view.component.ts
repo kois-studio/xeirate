@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 
 import { getDaysInMonth, type ScheduleAssignment, type Session } from '../../../lib/domain';
+import { countCoverageSlots } from '../../../lib/scheduler';
 import type { TranslationKey } from '../../i18n/translations';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { WEEKDAYS, WorkspaceService } from '../../services/workspace.service';
@@ -53,5 +54,25 @@ export class ScheduleViewComponent {
         return this.assignmentsForDate(date).filter(
             (assignment) => assignment.columnId === columnId,
         );
+    }
+
+    requiredSlotCount(session: Session): number {
+        return countCoverageSlots(session);
+    }
+
+    uncoveredSlotCount(session: Session, schedule: { assignments: ScheduleAssignment[] }): number {
+        return Math.max(this.requiredSlotCount(session) - schedule.assignments.length, 0);
+    }
+
+    assignmentMetadata(assignment: ScheduleAssignment, session: Session): string {
+        const column = session.scheduleConfig.columns.find(
+            (item) => item.id === assignment.columnId,
+        );
+        if (!column) {
+            return '';
+        }
+        return column.startTime && column.endTime
+            ? `${column.label} · ${column.startTime}–${column.endTime}`
+            : column.label;
     }
 }

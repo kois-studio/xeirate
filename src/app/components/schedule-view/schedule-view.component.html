@@ -17,11 +17,13 @@
         </div>
 
         @if (store.activeSchedule(); as schedule) {
-            <div class="mb-3 grid grid-cols-3 gap-2 max-[760px]:grid-cols-1 print:hidden">
-                <div class="grid gap-1 bg-[#213b47] p-3"><strong class="text-xl tracking-[-0.05em] text-[#e4ff69]">{{ schedule.assignments.length }}</strong><span class="text-[0.7rem] text-[#aec2c5]">{{ 'schedule.assigned' | t }}</span></div>
+            <div class="mb-3 grid grid-cols-4 gap-2 max-[760px]:grid-cols-1 print:hidden">
+                <div class="grid gap-1 bg-[#213b47] p-3"><strong class="text-xl tracking-[-0.05em] text-[#e4ff69]">{{ schedule.assignments.length }} / {{ requiredSlotCount(session) }}</strong><span class="text-[0.7rem] text-[#aec2c5]">{{ 'schedule.coverageTotal' | t }}</span></div>
+                <div class="grid gap-1 bg-[#213b47] p-3"><strong class="text-xl tracking-[-0.05em] text-[#e4ff69]">{{ uncoveredSlotCount(session, schedule) }}</strong><span class="text-[0.7rem] text-[#aec2c5]">{{ 'schedule.uncovered' | t }}</span></div>
                 <div class="grid gap-1 bg-[#213b47] p-3"><strong class="text-xl tracking-[-0.05em] text-[#e4ff69]">{{ schedule.fairness.maxDifference }}</strong><span class="text-[0.7rem] text-[#aec2c5]">{{ 'schedule.maxDifference' | t }}</span></div>
                 <div class="grid gap-1 bg-[#213b47] p-3"><strong class="text-xl tracking-[-0.05em] text-[#e4ff69]">{{ store.scheduleErrors().length + store.scheduleWarnings().length }}</strong><span class="text-[0.7rem] text-[#aec2c5]">{{ 'schedule.alertCount' | t }}</span></div>
             </div>
+            <p class="mb-4 bg-[#213b47] p-3 text-[0.74rem] leading-[1.45] text-[#aec2c5] print:hidden">{{ 'schedule.fairnessExplainer' | t:{ min: schedule.fairness.minAssignments, max: schedule.fairness.maxAssignments, difference: schedule.fairness.maxDifference, preferences: schedule.fairness.preferenceBreaks } }}</p>
             @if (store.scheduleIssues().length > 0) {
                 <ul class="mb-4 grid gap-2 p-0 print:hidden" [attr.aria-label]="'schedule.alerts' | t">
                     @for (issue of store.scheduleIssues(); track issue.id) {
@@ -76,7 +78,7 @@
                                         @if (assignmentsForColumn(date, column.id).length > 0) {
                                             <ul class="grid gap-1 p-0 text-[0.68rem] leading-tight">
                                                 @for (assignment of assignmentsForColumn(date, column.id); track assignment.slotId + assignment.participantId) {
-                                                    <li class="font-medium text-[#e4ff69] print:text-black">{{ assignmentAlias(assignment.participantId) }}</li>
+                                                    <li class="font-medium text-[#e4ff69] print:text-black"><span class="block">{{ assignmentAlias(assignment.participantId) }}</span><small class="block text-[0.6rem] font-normal text-[#aec2c5] print:text-black">{{ assignmentMetadata(assignment, session) }}</small></li>
                                                 }
                                             </ul>
                                         } @else {
@@ -104,7 +106,7 @@
                         @if (assignmentsForDate(date).length > 0) {
                             <ul class="mt-2 grid gap-1 p-0 text-[0.64rem] font-medium leading-tight text-[#e4ff69] print:text-black">
                                 @for (assignment of assignmentsForDate(date); track assignment.slotId + assignment.participantId) {
-                                    <li>{{ assignmentAlias(assignment.participantId) }}</li>
+                                    <li><span class="block">{{ assignmentAlias(assignment.participantId) }}</span><small class="block text-[0.58rem] font-normal text-[#aec2c5] print:text-black">{{ assignmentMetadata(assignment, session) }}</small></li>
                                 }
                             </ul>
                         } @else {

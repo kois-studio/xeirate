@@ -104,6 +104,10 @@ function buildCoverageSlots(session: Session): CoverageSlot[] {
     return slots;
 }
 
+export function countCoverageSlots(session: Session): number {
+    return buildCoverageSlots(session).length;
+}
+
 function eligibilityFor(session: Session, participantId: string, columnId: string): boolean {
     const entry = session.participantColumnEligibility.find(
         (item) => item.participantId === participantId,
