@@ -1,4 +1,5 @@
-import { Component, inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Component, effect, inject } from '@angular/core';
 
 import { AppButtonComponent } from '../../components/button/button.component';
 import { ConditionDialogComponent } from '../../components/condition-dialog/condition-dialog.component';
@@ -29,6 +30,8 @@ import type { WizardStep } from '../../services/workspace.service';
 })
 export class WorkspacePage {
     readonly store = inject(WorkspaceService);
+    private readonly document = inject(DOCUMENT);
+    private lastStep = this.store.wizardStep();
 
     readonly wizardSteps: readonly { id: WizardStep; label: TranslationKey }[] = [
         { id: 'people', label: 'workspace.stepPeople' },
@@ -36,6 +39,21 @@ export class WorkspacePage {
         { id: 'session', label: 'workspace.stepSession' },
         { id: 'proposal', label: 'workspace.stepProposal' },
     ];
+
+    constructor() {
+        effect(() => {
+            const step = this.store.wizardStep();
+            if (step === this.lastStep) {
+                return;
+            }
+            this.lastStep = step;
+            queueMicrotask(() => {
+                const content = this.document.getElementById('workspace-step-content');
+                content?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+                content?.focus({ preventScroll: true });
+            });
+        });
+    }
 
     stepNumber(step: WizardStep): number {
         return this.wizardSteps.findIndex((item) => item.id === step) + 1;

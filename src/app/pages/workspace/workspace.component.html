@@ -28,17 +28,19 @@
             </ol>
         </nav>
 
-        @if (store.wizardStep() === 'people') {
-            <app-people-view [workspace]="store.workspace()" mode="people" />
-        } @else if (store.wizardStep() === 'conditions') {
-            <app-people-view [workspace]="store.workspace()" mode="conditions" />
-        } @else if (store.wizardStep() === 'session') {
-            <app-sessions-view [workspace]="store.workspace()" [showSchedule]="false" />
-        } @else {
-            <app-schedule-view />
-        }
+        <div id="workspace-step-content" class="scroll-mt-4 outline-none" tabindex="-1">
+            @if (store.wizardStep() === 'people') {
+                <app-people-view [workspace]="store.workspace()" mode="people" />
+            } @else if (store.wizardStep() === 'conditions') {
+                <app-people-view [workspace]="store.workspace()" mode="conditions" />
+            } @else if (store.wizardStep() === 'session') {
+                <app-sessions-view [workspace]="store.workspace()" [showSchedule]="false" />
+            } @else {
+                <app-schedule-view />
+            }
+        </div>
 
-        <div class="flex items-center justify-between gap-3 border-t border-[#d8dfd9] pt-4 print:hidden">
+        <div class="sticky bottom-0 z-10 -mx-5 flex items-center justify-between gap-3 border-t border-[#d8dfd9] bg-[#fffdf8]/95 px-5 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-sm print:hidden sm:static sm:mx-0 sm:bg-transparent sm:px-0 sm:pt-4 sm:pb-0 sm:backdrop-blur-none">
             @if (store.wizardStep() !== 'people') {
                 <app-button buttonClass="min-h-10 rounded border border-[#aebdb4] px-3 py-2 text-xs font-medium text-[#162b36] transition-colors hover:bg-[#fffdf8] active:scale-105" (buttonClick)="store.previousWizardStep()">← {{ 'workspace.back' | t }}</app-button>
             } @else {
